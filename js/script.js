@@ -315,4 +315,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }, { passive: true });
   }
 
+  /* ==============
+   boton hacia arriba:
+   ===============*/
+
+   const botonSubir = document.getElementById("btn-subir");
+
+window.onscroll = function() {
+    if (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) {
+        botonSubir.style.display = "block";
+    } else {
+        botonSubir.style.display = "none";
+    }
+};
+
+botonSubir.addEventListener("click", function() {
+    window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+    });
+});
+
 });
