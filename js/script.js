@@ -14,13 +14,25 @@ document.addEventListener('DOMContentLoaded', function () {
       this.setAttribute('aria-label', abierto ? 'Cerrar menú' : 'Abrir menú');
     });
 
-    document.querySelectorAll('#menuNav a').forEach(function (link) {
-      link.addEventListener('click', function () {
-        menuNav.classList.remove('visible');
-        btnMenu.classList.remove('activo');
-        btnMenu.setAttribute('aria-label', 'Abrir menú');
-      });
-    });
+            document.querySelectorAll('#menuNav a').forEach(function (link) {
+          link.addEventListener('click', function (e) {
+            // 💥 CONTROL: Si el enlace está dentro de nuestro menú desplegable, NO cierres la hamburguesa todavía
+            if (link.closest('.menu-desplegable')) {
+              // Si el enlace que tocaste es una de las subcategorías (ej. Viento), entonces ahí sí cerramos todo
+              if (link.closest('.dropdown-contenido')) {
+                menuNav.classList.remove('visible');
+                btnMenu.classList.remove('activo');
+                btnMenu.setAttribute('aria-label', 'Abrir menú');
+              }
+              return; // Detiene la ejecución para que no cierre el menú en el primer toque de "Instrumentos"
+            }
+
+            // Para todos los demás enlaces normales (Inicio, Nosotros, Contacto), se cierra como siempre
+            menuNav.classList.remove('visible');
+            btnMenu.classList.remove('activo');
+            btnMenu.setAttribute('aria-label', 'Abrir menú');
+          });
+        });
 
     document.addEventListener('click', function (e) {
       if (!e.target.closest('header') && menuNav.classList.contains('visible')) {
@@ -354,6 +366,33 @@ if (btn) { // Validamos que el botón exista en la página actual
             btn.textContent = "🌙 Modo Noche";
         } else {
             btn.textContent = "☀️ Modo Día";
+        }
+    });
+}
+
+    /* =============================================
+   MENÚ DESPLEGABLE PARA CELULARES (CORREGIDO)
+   ============================================= */
+const enlaceInstrumentos = document.querySelector('.menu-desplegable > a');
+const listaCategorias = document.querySelector('.dropdown-contenido');
+
+// Revisa si estamos en un dispositivo móvil (pantalla menor o igual a 900px)
+if (enlaceInstrumentos && window.innerWidth <= 900) {
+    enlaceInstrumentos.addEventListener('click', function(e) {
+        e.preventDefault(); // Detiene el viaje inmediato a instrumentos.html
+        
+        // Verificamos si la lista está oculta analizando su opacidad actual
+        if (listaCategorias.style.opacity === '1') {
+            // Si ya estaba abierta, la cerramos por completo
+            listaCategorias.style.display = 'none';
+            listaCategorias.style.opacity = '0';
+            listaCategorias.style.pointerEvents = 'none';
+        } else {
+            // Si estaba oculta, la mostramos en formato columna vertical y la hacemos visible
+            listaCategorias.style.display = 'flex';
+            listaCategorias.style.flexDirection = 'column';
+            listaCategorias.style.opacity = '1';
+            listaCategorias.style.pointerEvents = 'auto';
         }
     });
 }

@@ -1708,4 +1708,73 @@ body.light-mode #toggle-theme:hover {
 }
 
 
+/* =============================================
+   MENÚ DESPLEGABLE VERTICAL DE CATEGORÍAS
+   ============================================= */
+/* 1. Base para el elemento padre */
+.menu-desplegable {
+    position: relative;
 }
+
+/* 2. La cajita flotante (Se oculta al inicio y cae verticalmente) */
+.menu-desplegable .dropdown-contenido {
+    display: none; /* Oculto por defecto */
+    position: absolute;
+    top: 100%; /* Aparece justo debajo de Instrumentos */
+    left: 0;
+    background-color: var(--color-secundario); /* El azul marino de tu barra */
+    min-width: 180px; /* Ancho de la cajita rectangular */
+    box-shadow: var(--sombra-fuerte); /* La sombra de tu proyecto */
+    border-radius: var(--radio); /* Bordes redondeados sutiles */
+    list-style: none;
+    padding: 10px 0;
+    z-index: 1100;
+    
+    /* 💥 AQUÍ ESTÁ EL TRUCO: Forzamos la dirección hacia abajo en lista vertical */
+    display: flex !important;
+    flex-direction: column !important; 
+    gap: 0px; /* Sin espacios raros entre opciones */
+    
+    /* Mientras no se pase el mouse, la mantenemos invisible */
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--transicion);
+}
+
+/* 3. Estilo para los enlaces de las categorías (Viento, Cuerda, Percusión, Teclado) */
+.menu-desplegable .dropdown-contenido li {
+    width: 100%; /* Ocupan todo el ancho de la caja para alinearse uno abajo del otro */
+    display: block;
+}
+
+.menu-desplegable .dropdown-contenido li a {
+    font-family: var(--fuente-cuerpo) !important; /* Tu letra Trebuchet MS */
+    color: var(--color-texto) !important; /* Letras blancas */
+    padding: 12px 20px !important; /* Relleno para que se vea ordenado */
+    display: block !important;
+    text-transform: uppercase !important; /* Mayúsculas como en tu ejemplo */
+    font-size: 0.85rem !important;
+    letter-spacing: 1px !important;
+    border-bottom: none !important; /* Quita cualquier línea horizontal */
+    text-align: left !important; /* Alineación del texto a la izquierda */
+    transition: background-color var(--transicion), color var(--transicion) !important;
+}
+
+/* 4. Efecto al pasar el mouse por cada subcategoría */
+.menu-desplegable .dropdown-contenido li a:hover {
+    background-color: rgba(232, 184, 75, 0.15) !important; /* Fondo sutil dorado */
+    color: var(--color-acento) !important; /* Letras doradas */
+}
+
+/* 5. MOSTRAR EL MENÚ: Cuando el mouse se pare sobre "Instrumentos" */
+@media (min-width: 901px) {
+    .menu-desplegable:hover .dropdown-contenido {
+        opacity: 1;
+        pointer-events: auto;
+        display: flex !important; /* Muestra la lista en bloque flexible vertical */
+    }
+}
+
+}
+
+
