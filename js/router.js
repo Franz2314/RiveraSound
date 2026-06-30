@@ -61,7 +61,6 @@ RiveraSound.router = {
     document.addEventListener('click', function (e) {
       var link = e.target.closest('a[href^="#"]');
       if (!link) return;
-      if (link.id === 'toggle-theme') return;
       e.preventDefault();
       var filtro = link.getAttribute('data-filtro');
       if (filtro) {
@@ -140,10 +139,10 @@ RiveraSound.router = {
 
   /** afterRender - Inicializa componentes visuales después de renderizar la página: animaciones reveal, contadores, catálogo y carrito. */
   afterRender: function (route) {
-    RiveraSound.reveal.iniciar();
-    RiveraSound.contadores.iniciar();
-    RiveraSound.catalogo.iniciar();
-    RiveraSound.carrito.renderSidebar();
+    try { RiveraSound.reveal.iniciar(); } catch (_) {}
+    try { RiveraSound.contadores.iniciar(); } catch (_) {}
+    try { RiveraSound.catalogo.iniciar(); } catch (_) {}
+    try { RiveraSound.carrito.renderSidebar(); } catch (_) {}
 
     if (route === 'instrumentos' || route === 'catalogo') {
       if (this._filtroActivo) {
@@ -256,6 +255,7 @@ RiveraSound.router = {
    *  También inicializa las validaciones en vivo de los formularios.
    */
   initCuentaTabs: function (hash) {
+    try {
     RiveraSound.validaciones.initFormulario('formLogin');
     RiveraSound.validaciones.initFormulario('formRegistro');
     var tabs = document.querySelectorAll('.cuenta-tab');     // Botones de tab
@@ -288,6 +288,7 @@ RiveraSound.router = {
 
     /* --- Mapa de hash a ID de tab. Si no hay match, se muestra login por defecto. --- */
     var tabMap = {
+      'cuenta': 'login',
       'cuenta-login': 'login',
       'cuenta-registro': 'registro',
       'cuenta-perfil': 'perfil',
@@ -404,6 +405,7 @@ RiveraSound.router = {
         window.location.hash = 'cuenta-login';
       });
     }
+    } catch (_) {}
   },
 
   /* ============ RENDERIZADO INLINE ============ */

@@ -1573,7 +1573,7 @@ footer {
 
 /* ============ MODO CLARO (Light Mode) ============ */
 body.light-mode {
-  background-color: #f4f6f9;
+  background-color: #e3f2fd;
   color: #111b30;
 }
 
@@ -1718,10 +1718,10 @@ body.light-mode section[style*="background-color: #f8f5f0"] {
 
 /* ============ DARK MODE MEDIA QUERY OVERRIDES PARA LIGHT-MODE CLASS ============ */
 body.light-mode {
-  --color-fondo-claro: #f4f6f9;
+  --color-fondo-claro: #e3f2fd;
   --color-blanco: #ffffff;
   --color-texto-oscuro: #111b30;
   --color-gris: #888;
-  background-color: #f4f6f9;
+  background-color: #e3f2fd;
   color: #111b30;
 }

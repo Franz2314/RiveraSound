@@ -291,17 +291,49 @@ header {
 #toggle-theme {
   cursor: pointer;
   white-space: nowrap;
+  background: none;
+  border: none;
+  color: var(--color-texto);
+  font-family: var(--fuente-cuerpo);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 5px 0;
+  border-bottom: 2px solid transparent;
+  transition: border-color var(--transicion), color var(--transicion), transform var(--transicion);
+  display: inline-block;
+}
+#toggle-theme:hover,
+body.light-mode #toggle-theme:hover {
+  color: var(--color-acento);
+  border-bottom-color: var(--color-acento);
+  transform: translateY(-2px);
+}
+body.light-mode #toggle-theme {
+  color: #1a1a2e;
 }
 
 @media (max-width: 600px) {
   #toggle-theme {
     display: block;
+    width: 100%;
+    text-align: left;
     padding: 14px 10px;
     border-bottom: 1px solid rgba(255,255,255,0.05);
     font-size: 0.9rem;
     color: var(--color-texto);
+    background: none;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    border-radius: 0;
+    letter-spacing: 0.5px;
   }
   #toggle-theme:hover {
     color: var(--color-acento);
+    padding-left: 20px;
+  }
+  body.light-mode #toggle-theme {
+    color: var(--color-texto);
   }
 }

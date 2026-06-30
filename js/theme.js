@@ -10,17 +10,18 @@ RiveraSound.theme = {
     var btn = document.getElementById('toggle-theme');
     if (!btn) return;
 
-    if (localStorage.getItem('riverasound_theme') === 'light') {
-      document.body.classList.add('light-mode');
-      btn.textContent = '🌙 Modo Noche';
-    }
+    try {
+      if (localStorage.getItem('riverasound_theme') === 'light') {
+        document.body.classList.add('light-mode');
+        btn.textContent = '🌙 Modo Noche';
+      }
+    } catch (_) {}
 
-    btn.addEventListener('click', function (e) {
-      e.preventDefault();
+    btn.addEventListener('click', function () {
       document.body.classList.toggle('light-mode');
       var esClaro = document.body.classList.contains('light-mode');
       btn.textContent = esClaro ? '🌙 Modo Noche' : '☀️ Modo Día';
-      localStorage.setItem('riverasound_theme', esClaro ? 'light' : 'dark');
+      try { localStorage.setItem('riverasound_theme', esClaro ? 'light' : 'dark'); } catch (_) {}
     });
   },
 

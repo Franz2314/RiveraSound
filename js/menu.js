@@ -41,6 +41,17 @@ RiveraSound.menu = {
       });
     });
 
+    document.querySelectorAll('#menuNav button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        nav.classList.remove('visible');
+        btn.classList.remove('activo');
+        btn.setAttribute('aria-label', 'Abrir menú');
+        document.querySelectorAll('.dropdown-contenido').forEach(function (d) {
+          d.classList.remove('mostrar');
+        });
+      });
+    });
+
     document.addEventListener('click', function (e) {
       if (!e.target.closest('header') && nav.classList.contains('visible')) {
         nav.classList.remove('visible');
