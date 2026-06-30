@@ -336,4 +336,26 @@ botonSubir.addEventListener("click", function() {
     });
 });
 
+
+/* ==============
+   boton modo dia/noche:
+   ===============*/
+
+  
+const btn = document.getElementById('toggle-theme');
+
+if (btn) { // Validamos que el botón exista en la página actual
+    btn.addEventListener('click', (e) => {
+        e.preventDefault(); 
+        document.body.classList.toggle('light-mode');
+        
+        // Cambia el texto basándose únicamente en si la clase está activa
+        if (document.body.classList.contains('light-mode')) {
+            btn.textContent = "🌙 Modo Noche";
+        } else {
+            btn.textContent = "☀️ Modo Día";
+        }
+    });
+}
+
 });

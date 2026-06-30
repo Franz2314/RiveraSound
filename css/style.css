@@ -1598,4 +1598,114 @@ footer {
   .seccion-nosotros-intro p {
     color: #bbb !important;
   }
+
+
+  
+  /* ==============
+   boton modo dia/noche:
+   ===============*/
+
+    /* ===================================================
+   CÓDIGO GLOBAL PARA EL MODO CLARO (LIGHT MODE)
+   =================================================== */
+
+/* Fondo general de la página claro y textos legibles */
+body.light-mode {
+    background-color: #f4f6f9;
+    color: #111b30;
+}
+
+/* Cambiar la barra de navegación (Header) a Blanco */
+body.light-mode header {
+    background-color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+/* Cambiar los enlaces del menú a color azul marino oscuro para que se vean sobre el fondo blanco */
+body.light-mode #menuNav ul li a {
+    color: #1a1a2e;
+}
+body.light-mode #menuNav ul li a:hover,
+body.light-mode #menuNav ul li a.activo {
+    color: #e8b84b; /* Mantiene tu hermoso amarillo dorado activo */
+}
+
+/* Hacer que el botón de Modo Día/Noche se vea oscuro en el menú claro */
+body.light-mode #toggle-theme {
+    color: #1a1a2e;
+}
+body.light-mode #toggle-theme:hover {
+    color: #e8b84b;
+}
+
+/* ---------------------------------------------------
+   LOGICA DE TARJETAS BLANCAS EN SECCIONES OSCURAS
+   (Sección: ¿Por qué elegir RiveraSound? / Destacados)
+   --------------------------------------------------- */
+
+/* Forzar que las tarjetas (.tarjeta) se vuelvan BLANCAS en modo día */
+body.light-mode .tarjeta {
+    background-color: #ffffff !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+/* Forzar que los títulos de las tarjetas pasen a tu azul marino oscuro */
+body.light-mode .tarjeta h3 {
+    color: #1a1a2e !important;
+}
+
+/* Forzar que las descripciones de las tarjetas sean gris oscuro legible */
+body.light-mode .tarjeta p {
+    color: #444444 !important;
+}
+
+/* Mantener el precio en dorado resaltante */
+body.light-mode .tarjeta .precio {
+    color: #e8b84b !important;
+}
+
+/* Forzar que los títulos de secciones que tengan fondos claros por defecto sean oscuros */
+body.light-mode .titulo-seccion {
+    color: #1a1a2e;
+}
+
+/* Modificar las secciones que tenían gris claro (#f8f5f0) para que se adapten al modo día */
+body.light-mode section[style*="background-color: #f8f5f0"] {
+    background-color: #ffffff !important;
+}
+
+
+
+
+
+
+
+
+
+
+/* ===================================================
+   CÓDIGO DIRECTO PARA EL MODO CLARO
+   =================================================== */
+
+/* Fondo general claro y texto oscuro */
+body.light-mode {
+    background-color: #f4f6f9;
+    color: #111b30;
+}
+
+/* Encabezados y fondos principales en blanco */
+body.light-mode header, 
+body.light-mode .hero-section {
+    background-color: #ffffff;
+}
+
+/* Si estás en modo claro, el botón del menú debe verse azul marino */
+body.light-mode #toggle-theme {
+    color: #111b30;
+}
+body.light-mode #toggle-theme:hover {
+    color: #FFC107;
+}
+
+
 }
