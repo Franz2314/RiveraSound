@@ -1,0 +1,108 @@
+<!-- ============================================ cuenta.html - Cuenta de usuario (snippet inyectado en #app) ============================================ -->
+
+<!-- ============ ENCABEZADO DE PÁGINA ============ -->
+<div class="page-header">
+  <h1>Mi Cuenta</h1>
+  <p>Accede a tu panel personal de RiveraSound</p>
+</div>
+
+<!-- ============ SECCIÓN DE PANEL DE CUENTA ============ -->
+<section>
+  <div class="contenedor">
+    <!-- --- Pestañas de navegación entre paneles: Login, Registro, Perfil, Pedidos --- -->
+    <div style="display:flex;gap:12px;justify-content:center;margin-bottom:32px;flex-wrap:wrap;">
+      <button class="cuenta-tab btn-filtro activo" data-tab="login">Iniciar Sesión</button>
+      <button class="cuenta-tab btn-filtro" data-tab="registro">Registrarse</button>
+      <button class="cuenta-tab btn-filtro" data-tab="perfil">Mi Perfil</button>
+      <button class="cuenta-tab btn-filtro" data-tab="pedidos">Mis Pedidos</button>
+    </div>
+
+    <div id="cuentaPanels">
+      <!-- ============ PANEL: INICIAR SESIÓN ============ -->
+      <div class="cuenta-panel activo" id="cuentaPanelLogin">
+        <div class="form-contenedor" style="max-width:440px;">
+          <form id="formLogin" novalidate>
+            <!-- Input de correo electrónico con validación: required, type=email -->
+            <div class="form-grupo">
+              <label for="loginCorreo">Correo electrónico</label>
+              <input type="email" id="loginCorreo" name="correo" placeholder="tu@correo.com" required>
+              <span class="error-msg"></span>
+            </div>
+            <!-- Input de contraseña con validación: required, minlength=6 -->
+            <div class="form-grupo">
+              <label for="loginPassword">Contraseña</label>
+              <input type="password" id="loginPassword" name="password" placeholder="Tu contraseña" required minlength="6">
+              <span class="error-msg"></span>
+            </div>
+            <button type="submit" class="btn btn-primario" style="width:100%;">Iniciar sesión</button>
+          </form>
+          <!-- Enlace para cambiar al panel de registro -->
+          <div class="cuenta-enlace">
+            <a href="#cuenta-registro">¿No tienes cuenta? Regístrate</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ PANEL: REGISTRARSE ============ -->
+      <div class="cuenta-panel" id="cuentaPanelRegistro">
+        <div class="form-contenedor" style="max-width:440px;">
+          <form id="formRegistro" novalidate>
+            <!-- Input de nombre: required, minlength=2 -->
+            <div class="form-grupo">
+              <label for="regNombre">Nombre</label>
+              <input type="text" id="regNombre" name="nombre" placeholder="Tu nombre" required minlength="2">
+              <span class="error-msg"></span>
+            </div>
+            <!-- Input de apellido: required, minlength=2 -->
+            <div class="form-grupo">
+              <label for="regApellido">Apellido</label>
+              <input type="text" id="regApellido" name="apellido" placeholder="Tu apellido" required minlength="2">
+              <span class="error-msg"></span>
+            </div>
+            <!-- Input de correo: required, type=email -->
+            <div class="form-grupo">
+              <label for="regCorreo">Correo electrónico</label>
+              <input type="email" id="regCorreo" name="correo" placeholder="tu@correo.com" required>
+              <span class="error-msg"></span>
+            </div>
+            <!-- Input de contraseña: required, minlength=6 -->
+            <div class="form-grupo">
+              <label for="regPassword">Contraseña</label>
+              <input type="password" id="regPassword" name="password" placeholder="Mínimo 6 caracteres" required minlength="6">
+              <span class="error-msg"></span>
+            </div>
+            <button type="submit" class="btn btn-primario" style="width:100%;">Crear cuenta</button>
+          </form>
+          <!-- Enlace para cambiar al panel de login -->
+          <div class="cuenta-enlace">
+            <a href="#cuenta-login">¿Ya tienes cuenta? Inicia sesión</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ PANEL: MI PERFIL ============ -->
+      <div class="cuenta-panel" id="cuentaPanelPerfil">
+        <div class="form-contenedor" style="max-width:440px;">
+          <div style="text-align:center;margin-bottom:20px;">
+            <div style="font-size:4rem;margin-bottom:8px;">👤</div>
+            <h3 style="color:var(--page-acento, var(--color-principal));">Inicia sesión</h3>
+            <p style="color:var(--color-gris);">---</p>
+          </div>
+          <a href="#cuenta-pedidos" class="btn btn-secundario" style="width:100%;text-align:center;margin-bottom:10px;">Ver mis pedidos</a>
+          <button id="btnCerrarSesion" class="btn btn-secundario" style="width:100%;text-align:center;border-color:var(--color-error);color:var(--color-error);display:none;">Cerrar sesión</button>
+        </div>
+      </div>
+
+      <!-- ============ PANEL: MIS PEDIDOS ============ -->
+      <!-- Estado vacío mostrado cuando no hay pedidos registrados -->
+      <div class="cuenta-panel" id="cuentaPanelPedidos">
+        <div style="text-align:center;padding:40px 0;">
+          <div style="font-size:3rem;opacity:0.3;margin-bottom:12px;">📦</div>
+          <h3 style="color:var(--color-principal);">No tienes pedidos aún</h3>
+          <p style="color:var(--color-gris);">Los pedidos que realices aparecerán aquí.</p>
+          <a href="#instrumentos" class="btn btn-primario" style="margin-top:12px;">Explorar catálogo</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

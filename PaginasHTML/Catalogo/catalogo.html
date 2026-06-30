@@ -1,0 +1,70 @@
+<!-- ============================================ catalogo.html - Catálogo de instrumentos (snippet inyectado en #app) ============================================ -->
+
+<!-- ============ ENCABEZADO DE PÁGINA ============ -->
+<div class="page-header">
+  <h1>Catálogo de Instrumentos</h1>
+  <p>Explora nuestra selección de instrumentos importados</p>
+</div>
+
+<!-- ============ SECCIÓN DE CATEGORÍAS ============ -->
+<section style="background-color: #f8f5f0;">
+  <div class="contenedor">
+    <h2 class="titulo-seccion reveal">Categorías</h2>
+    <span class="linea-dorada reveal"></span>
+    <!-- Grid con las 4 categorías principales: Viento, Cuerda, Percusión, Teclado -->
+    <div class="grid-tarjetas">
+      <div class="tarjeta reveal"><div class="tarjeta-icono">🎺</div><h3>Viento</h3><p>Saxofones, trompetas, flautas, clarinetes, oboes y más.</p></div>
+      <div class="tarjeta reveal"><div class="tarjeta-icono">🎸</div><h3>Cuerda</h3><p>Guitarras acústicas, eléctricas, violines, cellos, bajos y ukeleles.</p></div>
+      <div class="tarjeta reveal"><div class="tarjeta-icono">🥁</div><h3>Percusión</h3><p>Baterías, cajones peruanos, congas, bongós y timbaletas.</p></div>
+      <div class="tarjeta reveal"><div class="tarjeta-icono">🎹</div><h3>Teclado</h3><p>Pianos digitales, sintetizadores, teclados y controladores MIDI.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SECCIÓN DE TODOS LOS INSTRUMENTOS ============ -->
+<section>
+  <div class="contenedor">
+    <h2 class="titulo-seccion reveal">Todos los Instrumentos</h2>
+    <span class="linea-dorada reveal"></span>
+    <p class="subtitulo-seccion reveal">Precios en soles peruanos (S/). Stock actualizado semanalmente.</p>
+
+    <!-- --- Campo de búsqueda en vivo por nombre o marca --- -->
+    <div class="filtro-busqueda reveal">
+      <input type="text" id="busquedaInstrumento" placeholder="Buscar instrumento o marca...">
+    </div>
+
+    <!-- --- Botones de filtro por categoría --- -->
+    <div class="filtros-catalogo reveal" id="filtrosCategoria">
+      <button class="btn-filtro activo" data-categoria="todas">Todos</button>
+      <button class="btn-filtro" data-categoria="viento">🎺 Viento</button>
+      <button class="btn-filtro" data-categoria="cuerda">🎸 Cuerda</button>
+      <button class="btn-filtro" data-categoria="percusion">🥁 Percusión</button>
+      <button class="btn-filtro" data-categoria="teclado">🎹 Teclado</button>
+    </div>
+
+    <!-- --- Grid dinámico: el JS renderiza aquí las tarjetas de instrumentos --- -->
+    <div class="grid-tarjetas" id="catalogoDinamico"></div>
+
+    <!-- --- Tabla de instrumentos con columnas: nombre, marca, categoría, precio, stock --- -->
+    <div class="tabla-contenedor mt-30">
+      <table>
+        <thead><tr><th>Instrumento</th><th>Marca / Modelo</th><th>Categoría</th><th>Precio (S/)</th><th>Stock</th><th>Acción</th></tr></thead>
+        <tbody id="tablaCatalogoBody"></tbody>
+      </table>
+    </div>
+
+    <!-- --- Leyenda de badges de estado de stock --- -->
+    <div class="flex-center flex-gap-20" style="margin-top:20px;flex-wrap:wrap;">
+      <span class="badge badge-disponible">Disponible</span>
+      <span class="badge badge-agotado">Agotado</span>
+      <span class="badge badge-pedido">Por pedido (3–7 días)</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============ BANNER CTA - PEDIDOS ESPECIALES ============ -->
+<div class="banner-cta">
+  <h2>¿No encuentras lo que buscas?</h2>
+  <p>Podemos importar cualquier instrumento por encargo. ¡Consúltanos sin compromiso!</p>
+  <a href="#contacto" class="btn btn-secundario">Solicitar un instrumento</a>
+</div>
