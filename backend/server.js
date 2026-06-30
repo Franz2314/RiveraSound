@@ -33,7 +33,9 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Archivos estáticos servidos desde la raíz del proyecto (para el frontend SPA)
-app.use(express.static(path.join(__dirname, '..')));
+// `index: false` evita que express.static sirva index.html/Index.html en la raíz,
+// así el SPA fallback sirve PaginasHTML/Index/Index.html directamente (sin redirect).
+app.use(express.static(path.join(__dirname, '..'), { index: false }));
 app.use('/img', express.static(path.join(__dirname, '..', 'img')));
 
 /* ============ Montaje de rutas API ============ */
@@ -61,7 +63,7 @@ app.use((req, res) => {
   if (req.path.startsWith('/api/')) {
     return res.status(404).json({ error: 'Endpoint no encontrado' });
   }
-  res.sendFile(path.join(__dirname, '..', 'Index.html'));
+  res.sendFile(path.join(__dirname, '..', 'PaginasHTML', 'Index', 'Index.html'));
 });
 
 /* ============ Inicialización del servidor ============ */

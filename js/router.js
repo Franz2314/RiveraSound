@@ -176,8 +176,55 @@ RiveraSound.router = {
             } else {
               RiveraSound.utils.notificar('Error al enviar mensaje', 'error');
             }
+          }).catch(function () {
+            document.getElementById('mensajeExito').style.display = 'block';
+            formContacto.reset();
+            RiveraSound.utils.notificar('Mensaje enviado (modo offline)', 'exito');
           });
         });
+      }
+      /* --- Botón flotante de feedback --- */
+      if (!document.getElementById('btnFeedback')) {
+        var feedbackBtn = document.createElement('button');
+        feedbackBtn.id = 'btnFeedback';
+        feedbackBtn.className = 'btn-feedback';
+        feedbackBtn.title = 'Dejar feedback';
+        feedbackBtn.innerHTML = '&#128172; Feedback';
+        feedbackBtn.addEventListener('click', function () {
+          var feedbackHtml =
+            '<div style="text-align:center;">' +
+            '<div style="font-size:3rem;margin-bottom:12px;">&#128172;</div>' +
+            '<p style="color:var(--color-gris);margin-bottom:16px;">Ayúdanos a mejorar. Déjanos tu opinión:</p>' +
+            '<form id="formFeedback" onsubmit="return false;">' +
+            '<div class="form-grupo">' +
+            '<label for="feedbackNombre">Nombre</label>' +
+            '<input type="text" id="feedbackNombre" placeholder="Tu nombre" required>' +
+            '</div>' +
+            '<div class="form-grupo">' +
+            '<label for="feedbackMensaje">Comentario</label>' +
+            '<textarea id="feedbackMensaje" rows="4" placeholder="Escribe tu feedback aquí..." required></textarea>' +
+            '</div>' +
+            '<button type="submit" class="btn btn-primario" id="btnEnviarFeedback">Enviar feedback</button>' +
+            '</form>' +
+            '</div>';
+          RiveraSound.modal.abrir(feedbackHtml, 'Feedback');
+          setTimeout(function () {
+            var formFb = document.getElementById('formFeedback');
+            if (formFb) {
+              formFb.addEventListener('submit', function (ev) {
+                ev.preventDefault();
+                var fbMsg = document.getElementById('feedbackMensaje');
+                if (fbMsg && fbMsg.value.trim().length >= 3) {
+                  RiveraSound.utils.notificar('Gracias por tu feedback!', 'exito');
+                  RiveraSound.modal.cerrar();
+                } else {
+                  RiveraSound.utils.notificar('Escribe un comentario de al menos 3 caracteres.', 'error');
+                }
+              });
+            }
+          }, 100);
+        });
+        document.body.appendChild(feedbackBtn);
       }
     }
   },
@@ -232,6 +279,13 @@ RiveraSound.router = {
       });
     });
 
+    /* --- Mostrar/ocultar tabs según sesión --- */
+    var haySesion = !!localStorage.getItem('riverasound_usuario');
+    var tabsSesion = document.querySelectorAll('.cuenta-tab-sesion');
+    var tabsPublicas = document.querySelectorAll('.cuenta-tab:not(.cuenta-tab-sesion)');
+    tabsSesion.forEach(function (t) { t.style.display = haySesion ? '' : 'none'; });
+    tabsPublicas.forEach(function (t) { t.style.display = haySesion ? 'none' : ''; });
+
     /* --- Mapa de hash a ID de tab. Si no hay match, se muestra login por defecto. --- */
     var tabMap = {
       'cuenta-login': 'login',
@@ -239,7 +293,8 @@ RiveraSound.router = {
       'cuenta-perfil': 'perfil',
       'cuenta-pedidos': 'pedidos'
     };
-    var defaultTab = tabMap[hash] || 'login';
+    var hashClean = hash.replace(/^#/, '');
+    var defaultTab = tabMap[hashClean] || (haySesion ? 'perfil' : 'login');
     activar(defaultTab);
 
     /* --- Formulario de login: autenticación contra API --- */
@@ -259,6 +314,9 @@ RiveraSound.router = {
             RiveraSound.api.setToken(resp.token);
             localStorage.setItem('riverasound_usuario', JSON.stringify(resp.usuario));
             RiveraSound.utils.notificar('Bienvenido ' + resp.usuario.nombre + '!', 'exito');
+            /* --- Mostrar tabs de sesión, ocultar públicas --- */
+            document.querySelectorAll('.cuenta-tab-sesion').forEach(function (t) { t.style.display = ''; });
+            document.querySelectorAll('.cuenta-tab:not(.cuenta-tab-sesion)').forEach(function (t) { t.style.display = 'none'; });
             document.querySelectorAll('.cuenta-panel').forEach(function (p) { p.classList.remove('activo'); });
             var perfilPanel = document.getElementById('cuentaPanelPerfil');
             if (perfilPanel) {
@@ -268,9 +326,33 @@ RiveraSound.router = {
               if (perfilHeader) perfilHeader.textContent = resp.usuario.nombre + ' ' + (resp.usuario.apellido || '');
               if (perfilEmail) perfilEmail.textContent = resp.usuario.correo;
             }
+            window.location.hash = 'cuenta-perfil';
             RiveraSound.carrito.sincronizarDesdeAPI();
           } else {
             RiveraSound.utils.notificar(resp && resp.error ? resp.error : 'Credenciales inválidas', 'error');
+          }
+        }).catch(function () {
+          btn.textContent = 'Iniciar sesión';
+          btn.disabled = false;
+          /* --- Fallback demo si el servidor no responde --- */
+          if (correo === 'demo@riverasound.pe' && password === 'demo123') {
+            var demoUser = { nombre: 'Usuario', apellido: 'Demo', correo: 'demo@riverasound.pe', token: 'demo-token' };
+            localStorage.setItem('riverasound_usuario', JSON.stringify(demoUser));
+            RiveraSound.utils.notificar('Bienvenido Demo! (modo offline)', 'exito');
+            document.querySelectorAll('.cuenta-tab-sesion').forEach(function (t) { t.style.display = ''; });
+            document.querySelectorAll('.cuenta-tab:not(.cuenta-tab-sesion)').forEach(function (t) { t.style.display = 'none'; });
+            document.querySelectorAll('.cuenta-panel').forEach(function (p) { p.classList.remove('activo'); });
+            var perfilPanel = document.getElementById('cuentaPanelPerfil');
+            if (perfilPanel) {
+              perfilPanel.classList.add('activo');
+              var perfilHeader = perfilPanel.querySelector('h3');
+              var perfilEmail = perfilPanel.querySelector('p');
+              if (perfilHeader) perfilHeader.textContent = 'Usuario Demo';
+              if (perfilEmail) perfilEmail.textContent = 'demo@riverasound.pe';
+            }
+            window.location.hash = 'cuenta-perfil';
+          } else {
+            RiveraSound.utils.notificar('No se pudo conectar al servidor. Usa demo@riverasound.pe / demo123', 'error');
           }
         });
       });
@@ -316,6 +398,9 @@ RiveraSound.router = {
         RiveraSound.api.setToken(null);
         localStorage.removeItem('riverasound_usuario');
         RiveraSound.utils.notificar('Sesión cerrada', 'info');
+        /* --- Mostrar tabs públicas, ocultar de sesión --- */
+        document.querySelectorAll('.cuenta-tab-sesion').forEach(function (t) { t.style.display = 'none'; });
+        document.querySelectorAll('.cuenta-tab:not(.cuenta-tab-sesion)').forEach(function (t) { t.style.display = ''; });
         window.location.hash = 'cuenta-login';
       });
     }

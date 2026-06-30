@@ -23,6 +23,7 @@ RiveraSound.menu = {
         var dd = link.closest('.menu-desplegable');
         if (dd && !link.closest('.dropdown-contenido') && window.innerWidth <= 900) {
           e.preventDefault();
+          e.stopPropagation();
           var contenido = dd.querySelector('.dropdown-contenido');
           if (contenido) {
             contenido.classList.toggle('mostrar');

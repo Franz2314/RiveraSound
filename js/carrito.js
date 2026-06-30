@@ -280,7 +280,15 @@ RiveraSound.carrito = {
           };
           RiveraSound.api.crearPedido(pedidoData).then(function (resp) {
             if (resp && resp.exito) {
-              RiveraSound.utils.notificar('Pedido creado con éxito', 'exito');
+              RiveraSound.modal.abrir(
+                '<div style="text-align:center;">' +
+                '<div style="font-size:4rem;margin-bottom:16px;">&#9989;</div>' +
+                '<h3 style="color:var(--color-exito);margin-bottom:12px;">&#161;Pedido confirmado!</h3>' +
+                '<p style="color:var(--color-gris);margin-bottom:20px;">Tu pedido #' + (resp.pedido_id || '---') + ' ha sido registrado. Te contactaremos pronto.</p>' +
+                '<button class="btn btn-primario" onclick="RiveraSound.modal.cerrar()">Cerrar</button>' +
+                '</div>',
+                'Compra exitosa'
+              );
               self.vaciar();
             } else {
               RiveraSound.utils.notificar('Error al crear pedido. Inicia sesión.', 'error');

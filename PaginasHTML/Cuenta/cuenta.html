@@ -10,11 +10,12 @@
 <section>
   <div class="contenedor">
     <!-- --- Pestañas de navegación entre paneles: Login, Registro, Perfil, Pedidos --- -->
-    <div style="display:flex;gap:12px;justify-content:center;margin-bottom:32px;flex-wrap:wrap;">
+    <!-- Perfil y Pedidos se ocultan/muestran por JS según estado de sesión -->
+    <div id="cuentaTabs" style="display:flex;gap:12px;justify-content:center;margin-bottom:32px;flex-wrap:wrap;">
       <button class="cuenta-tab btn-filtro activo" data-tab="login">Iniciar Sesión</button>
       <button class="cuenta-tab btn-filtro" data-tab="registro">Registrarse</button>
-      <button class="cuenta-tab btn-filtro" data-tab="perfil">Mi Perfil</button>
-      <button class="cuenta-tab btn-filtro" data-tab="pedidos">Mis Pedidos</button>
+      <button class="cuenta-tab btn-filtro cuenta-tab-sesion" data-tab="perfil" style="display:none;">Mi Perfil</button>
+      <button class="cuenta-tab btn-filtro cuenta-tab-sesion" data-tab="pedidos" style="display:none;">Mis Pedidos</button>
     </div>
 
     <div id="cuentaPanels">
