@@ -1,10 +1,22 @@
+/* ============================================ carrito.js - Gestión del carrito de compras e historial de pedidos (localStorage) ============================================ */
+
 var RiveraSound = RiveraSound || {};
 
+/**
+ * RiveraSound.carrito - Módulo que maneja el carrito de compras y el historial de pedidos.
+ * Todo funciona con localStorage: no requiere backend ni base de datos.
+ * Operaciones: agregar/quitar productos, renderizar sidebar y página de carrito,
+ * crear pedidos, cambiar estados de pedidos (Pendiente, En envío, Entregado, etc.).
+ */
 RiveraSound.carrito = {
+  /** key - Clave en localStorage para el carrito actual. */
   key: 'riverasound_carrito',
+  /** pedidosKey - Clave en localStorage para el historial de pedidos. */
   pedidosKey: 'riverasound_pedidos',
+  /** items - Array de objetos { id, nombre, marca, precio, emoji, cantidad, stock } con los productos en el carrito. */
   items: [],
 
+  /** init - Inicializa el carrito: carga los datos guardados y actualiza el badge del header. */
   init: function () {
     this.cargar();
     this.actualizarBadge();
@@ -127,6 +139,9 @@ RiveraSound.carrito = {
   },
 
   /* ============ PEDIDOS (HISTORIAL LOCAL) ============ */
+  /** obtenerPedidos - Recupera el array de pedidos desde localStorage.
+   *  @returns {Array} - Lista de pedidos o array vacío si no hay datos.
+   */
 
   obtenerPedidos: function () {
     try {
@@ -136,6 +151,11 @@ RiveraSound.carrito = {
     }
   },
 
+  /** crearPedido - Convierte el contenido actual del carrito en un pedido.
+   *  Verifica que el usuario haya iniciado sesión. Guarda el pedido en localStorage
+   *  con ID único (ej: PED-XXXX-XXXX), fecha, items, total, estado inicial 'Pendiente' y correo del usuario.
+   *  @returns {object|false} - Objeto pedido si se creó exitosamente, false si no hay sesión.
+   */
   crearPedido: function () {
     var usuario = localStorage.getItem('riverasound_usuario');
     if (!usuario) {
@@ -156,6 +176,11 @@ RiveraSound.carrito = {
     return pedido;
   },
 
+  /** actualizarEstadoPedido - Cambia el estado de un pedido existente.
+   *  Estados disponibles: Pendiente, En envío, Entregado, Recogido en tienda, Cancelado.
+   *  @param {string} pedidoId - ID del pedido a actualizar.
+   *  @param {string} nuevoEstado - Nuevo estado del pedido.
+   */
   actualizarEstadoPedido: function (pedidoId, nuevoEstado) {
     var pedidos = this.obtenerPedidos();
     pedidos.forEach(function (p) {
@@ -164,7 +189,7 @@ RiveraSound.carrito = {
     localStorage.setItem(this.pedidosKey, JSON.stringify(pedidos));
   },
 
-  /* ============ PÁGINA CARRITO ============ */
+  /* ============ PÁGINA CARRITO (vista completa en #carrito) ============ */
 
   renderPagina: function () {
     var contenedor = document.getElementById('carritoPageItems');

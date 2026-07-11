@@ -1,7 +1,19 @@
+/* ============================================ router.js - Enrutador SPA, autenticación local y gestión de cuenta ============================================ */
+
 var RiveraSound = RiveraSound || {};
 
+/**
+ * RiveraSound.router - Enrutador de página única (SPA) basado en hash (#).
+ * Escucha cambios en window.location.hash y carga fragmentos HTML parciales
+ * dentro de <div id="app"> sin recargar la página.
+ * También gestiona: login/registro local (localStorage), perfil de usuario,
+ * historial de pedidos con cambio de estados, y formulario de contacto.
+ */
 RiveraSound.router = {
 
+  /** routeMap - Asocia cada hash de URL a un nombre de ruta interno.
+   *  Ej: '#instrumentos' → 'instrumentos', '#cuenta-login' → 'cuenta-login'.
+   */
   routeMap: {
     '': 'inicio', '#': 'inicio', '#inicio': 'inicio',
     '#instrumentos': 'instrumentos',
@@ -18,6 +30,10 @@ RiveraSound.router = {
     '#cuenta-pedidos': 'cuenta-pedidos'
   },
 
+  /** pageFiles - Asocia cada nombre de ruta al archivo HTML parcial que debe cargar.
+   *  'inicio' y '404' se renderizan inline (sin fetch) porque están definidos
+   *  directamente como strings HTML en renderInicio() y render404().
+   */
   pageFiles: {
     'inicio': '',
     'instrumentos': 'PaginasHTML/Catalogo/catalogo.html',
@@ -34,13 +50,18 @@ RiveraSound.router = {
     'cuenta-pedidos': 'PaginasHTML/Cuenta/cuenta.html'
   },
 
+  /** currentRoute - Almacena la ruta actual para evitar recargar la misma vista. */
   currentRoute: null,
 
+  /** init - Punto de entrada: bindea los eventos de navegación y resuelve la ruta inicial. */
   init: function () {
     this.bindEvents();
     this.resolve();
   },
 
+  /** bindEvents - Escucha cambios en el hash de la URL (hashchange) y
+   *  captura clicks en enlaces <a href="#..."> para navegación SPA sin recarga.
+   */
   bindEvents: function () {
     var self = this;
     window.addEventListener('hashchange', function () { self.resolve(); });
@@ -56,6 +77,10 @@ RiveraSound.router = {
     });
   },
 
+  /** resolve - Lee el hash actual de la URL y decide qué ruta cargar.
+   *  Si la ruta es la misma que la actual (excepto carrito), no recarga.
+   *  Actualiza el atributo data-page del body para personalización CSS por página.
+   */
   resolve: function () {
     var hash = window.location.hash || '#';
     var route = this.routeMap[hash] || '404';
@@ -65,6 +90,12 @@ RiveraSound.router = {
     this.loadRoute(route, hash);
   },
 
+  /** loadRoute - Carga el contenido de la ruta en <div id="app">.
+   *  Si es 'inicio' o '404', usa HTML inline. Para el resto, hace fetch()
+   *  del archivo HTML parcial y lo inyecta. Muestra un spinner durante la carga.
+   *  @param {string} route - Nombre de la ruta interna.
+   *  @param {string} hash - Hash de URL original (para tabs de cuenta).
+   */
   loadRoute: function (route, hash) {
     var app = document.getElementById('app');
     if (!app) return;
@@ -110,6 +141,10 @@ RiveraSound.router = {
       });
   },
 
+  /** postProcess - Ejecuta lógica adicional después de inyectar el HTML parcial.
+   *  @param {string} route - Ruta cargada.
+   *  @param {string} hash - Hash de URL original.
+   */
   postProcess: function (route, hash) {
     if (route === 'cuenta' || route === 'cuenta-login' || route === 'cuenta-registro' ||
         route === 'cuenta-perfil' || route === 'cuenta-pedidos') {
@@ -117,6 +152,11 @@ RiveraSound.router = {
     }
   },
 
+  /** afterRender - Inicializa módulos y bindea eventos después de cargar una vista.
+   *  Reactiva: scroll reveal, contadores, catálogo, sidebar del carrito.
+   *  Para contacto: inicializa validación y el formulario de envío local.
+   *  @param {string} route - Ruta cargada.
+   */
   afterRender: function (route) {
     try { RiveraSound.reveal.iniciar(); } catch (_) {}
     try { RiveraSound.contadores.iniciar(); } catch (_) {}
@@ -191,6 +231,9 @@ RiveraSound.router = {
     }
   },
 
+  /** updateNav - Resalta el enlace activo en el menú de navegación según la ruta actual.
+   *  @param {string} route - Ruta activa.
+   */
   updateNav: function (route) {
     var map = {
       inicio: 'inicio', instrumentos: 'instrumentos', catalogo: 'catalogo',
@@ -207,8 +250,14 @@ RiveraSound.router = {
     });
   },
 
-  /* ============ CUENTA TABS ============ */
+  /* ============ CUENTA TABS (Login, Registro, Perfil, Pedidos) ============ */
 
+  /** initCuentaTabs - Inicializa la lógica de las pestañas de la sección Cuenta.
+   *  Gestiona: login local (contra localStorage + demo hardcodeado),
+   *  registro local, perfil del usuario y renderizado de pedidos.
+   *  Muestra/oculta tabs según si hay sesión activa.
+   *  @param {string} hash - Hash de URL para determinar el tab inicial.
+   */
   initCuentaTabs: function (hash) {
     try {
     RiveraSound.validaciones.initFormulario('formLogin');
@@ -370,8 +419,13 @@ RiveraSound.router = {
     } catch (_) {}
   },
 
-  /* ============ HISTORIAL DE PEDIDOS ============ */
+  /* ============ HISTORIAL DE PEDIDOS (renderizado en el tab de pedidos) ============ */
 
+  /** renderPedidos - Renderiza el historial de pedidos del usuario logueado.
+   *  Filtra pedidos por correo del usuario actual y muestra cada pedido
+   *  con un <select> para cambiar su estado (Pendiente, En envío, etc.).
+   *  Los cambios de estado se guardan inmediatamente en localStorage.
+   */
   renderPedidos: function () {
     var pedidos = RiveraSound.carrito.obtenerPedidos();
     var usuario = localStorage.getItem('riverasound_usuario');
@@ -435,8 +489,13 @@ RiveraSound.router = {
     });
   },
 
-  /* ============ RENDER INLINE ============ */
+  /* ============ RENDER INLINE (páginas sin fetch) ============ */
 
+  /** renderInicio - Genera el HTML de la página de inicio como string.
+   *  Incluye hero, secciones con tarjetas, llamadas a la acción (CTA) y categorías.
+   *  Se inyecta directamente en <div id="app"> sin fetch.
+   *  @returns {string} - HTML completo de la página de inicio.
+   */
   renderInicio: function () {
     return '\
 <section class="hero">\
@@ -490,6 +549,9 @@ RiveraSound.router = {
 </section>';
   },
 
+  /** render404 - Genera el HTML de la página de error 404 (ruta no encontrada).
+   *  @returns {string} - HTML del mensaje 404 con botón para volver al inicio.
+   */
   render404: function () {
     return '\
 <section>\
