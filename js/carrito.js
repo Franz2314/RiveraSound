@@ -2,8 +2,8 @@ var RiveraSound = RiveraSound || {};
 
 RiveraSound.carrito = {
   key: 'riverasound_carrito',
+  pedidosKey: 'riverasound_pedidos',
   items: [],
-  modo: 'local',
 
   init: function () {
     this.cargar();
@@ -16,31 +16,6 @@ RiveraSound.carrito = {
     } catch (e) {
       this.items = [];
     }
-    if (RiveraSound.api.getToken()) {
-      this.sincronizarDesdeAPI();
-    }
-  },
-
-  sincronizarDesdeAPI: function () {
-    var self = this;
-    RiveraSound.api.carritoListar().then(function (items) {
-      if (items && items.length > 0) {
-        self.items = items.map(function (i) {
-          return {
-            id: i.producto_id,
-            carritoId: i.id,
-            nombre: i.nombre,
-            marca: i.marca,
-            precio: parseFloat(i.precio),
-            emoji: i.emoji,
-            cantidad: i.cantidad,
-            stock: i.stock
-          };
-        });
-        self.modo = 'api';
-        self.guardar();
-      }
-    });
   },
 
   guardar: function () {
@@ -53,29 +28,10 @@ RiveraSound.carrito = {
   },
 
   agregar: function (producto) {
-    var self = this;
     var existente = null;
     this.items.forEach(function (item) {
       if (item.id === producto.id) existente = item;
     });
-
-    if (self.modo === 'api' && RiveraSound.api.getToken()) {
-      RiveraSound.api.carritoAgregar(producto.id, 1).then(function (resp) {
-        if (resp && resp.exito) {
-          self.sincronizarDesdeAPI();
-        } else {
-          self.agregarLocal(producto, existente);
-        }
-      });
-    } else {
-      this.agregarLocal(producto, existente);
-    }
-
-    RiveraSound.utils.notificar(producto.nombre + ' agregado al carrito', 'exito');
-    this.renderSidebar();
-  },
-
-  agregarLocal: function (producto, existente) {
     if (existente) {
       existente.cantidad = (existente.cantidad || 1) + 1;
     } else {
@@ -83,42 +39,22 @@ RiveraSound.carrito = {
       this.items.push(producto);
     }
     this.guardar();
+    RiveraSound.utils.notificar(producto.nombre + ' agregado al carrito', 'exito');
+    this.renderSidebar();
   },
 
   eliminar: function (id) {
-    var self = this;
-    var item = this.items.filter(function (i) { return i.id === id; })[0];
-
-    if (self.modo === 'api' && item && item.carritoId && RiveraSound.api.getToken()) {
-      RiveraSound.api.carritoEliminar(item.carritoId).then(function () {
-        self.items = self.items.filter(function (i) { return i.id !== id; });
-        self.guardar();
-        self.renderSidebar();
-        if (document.getElementById('carritoPageItems')) self.renderPagina();
-      });
-    } else {
-      this.items = this.items.filter(function (i) { return i.id !== id; });
-      this.guardar();
-      this.renderSidebar();
-      if (document.getElementById('carritoPageItems')) this.renderPagina();
-    }
+    this.items = this.items.filter(function (i) { return i.id !== id; });
+    this.guardar();
+    this.renderSidebar();
+    if (document.getElementById('carritoPageItems')) this.renderPagina();
   },
 
   vaciar: function () {
-    var self = this;
-    if (self.modo === 'api' && RiveraSound.api.getToken()) {
-      RiveraSound.api.carritoVaciar().then(function () {
-        self.items = [];
-        self.guardar();
-        self.renderSidebar();
-        if (document.getElementById('carritoPageItems')) self.renderPagina();
-      });
-    } else {
-      this.items = [];
-      this.guardar();
-      this.renderSidebar();
-      if (document.getElementById('carritoPageItems')) this.renderPagina();
-    }
+    this.items = [];
+    this.guardar();
+    this.renderSidebar();
+    if (document.getElementById('carritoPageItems')) this.renderPagina();
   },
 
   total: function () {
@@ -190,6 +126,46 @@ RiveraSound.carrito = {
     if (overlay) overlay.classList.remove('activo');
   },
 
+  /* ============ PEDIDOS (HISTORIAL LOCAL) ============ */
+
+  obtenerPedidos: function () {
+    try {
+      return JSON.parse(localStorage.getItem(this.pedidosKey)) || [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  crearPedido: function () {
+    var usuario = localStorage.getItem('riverasound_usuario');
+    if (!usuario) {
+      RiveraSound.utils.notificar('Inicia sesión para comprar', 'info');
+      return false;
+    }
+    var pedido = {
+      id: 'PED-' + Date.now().toString(36).toUpperCase() + '-' + Math.random().toString(36).substring(2, 6).toUpperCase(),
+      fecha: new Date().toLocaleDateString('es-PE', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' }),
+      items: this.items.map(function (i) { return { id: i.id, nombre: i.nombre, precio: i.precio, cantidad: i.cantidad || 1, emoji: i.emoji }; }),
+      total: this.total(),
+      estado: 'Pendiente',
+      usuario: JSON.parse(usuario).correo
+    };
+    var pedidos = this.obtenerPedidos();
+    pedidos.unshift(pedido);
+    localStorage.setItem(this.pedidosKey, JSON.stringify(pedidos));
+    return pedido;
+  },
+
+  actualizarEstadoPedido: function (pedidoId, nuevoEstado) {
+    var pedidos = this.obtenerPedidos();
+    pedidos.forEach(function (p) {
+      if (p.id === pedidoId) p.estado = nuevoEstado;
+    });
+    localStorage.setItem(this.pedidosKey, JSON.stringify(pedidos));
+  },
+
+  /* ============ PÁGINA CARRITO ============ */
+
   renderPagina: function () {
     var contenedor = document.getElementById('carritoPageItems');
     if (!contenedor) return;
@@ -227,7 +203,7 @@ RiveraSound.carrito = {
 
     html += '<div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;justify-content:flex-end;">\
       <button class="btn btn-secundario" id="vaciarCarrito">Vaciar carrito</button>\
-      <button class="btn btn-primario" id="checkoutCarrito">Proceder al pago</button>\
+      <button class="btn btn-primario" id="checkoutCarrito">Realizar Compra</button>\
     </div>';
 
     contenedor.innerHTML = html;
@@ -272,30 +248,20 @@ RiveraSound.carrito = {
     var checkoutBtn = document.getElementById('checkoutCarrito');
     if (checkoutBtn) {
       checkoutBtn.addEventListener('click', function () {
-        if (RiveraSound.api.getToken()) {
-          var pedidoData = {
-            items: self.items.map(function (i) {
-              return { producto_id: i.id, cantidad: i.cantidad || 1 };
-            })
-          };
-          RiveraSound.api.crearPedido(pedidoData).then(function (resp) {
-            if (resp && resp.exito) {
-              RiveraSound.modal.abrir(
-                '<div style="text-align:center;">' +
-                '<div style="font-size:4rem;margin-bottom:16px;">&#9989;</div>' +
-                '<h3 style="color:var(--color-exito);margin-bottom:12px;">&#161;Pedido confirmado!</h3>' +
-                '<p style="color:var(--color-gris);margin-bottom:20px;">Tu pedido #' + (resp.pedido_id || '---') + ' ha sido registrado. Te contactaremos pronto.</p>' +
-                '<button class="btn btn-primario" onclick="RiveraSound.modal.cerrar()">Cerrar</button>' +
-                '</div>',
-                'Compra exitosa'
-              );
-              self.vaciar();
-            } else {
-              RiveraSound.utils.notificar('Error al crear pedido. Inicia sesión.', 'error');
-            }
-          });
-        } else {
-          RiveraSound.utils.notificar('Inicia sesión para comprar', 'info');
+        var pedido = self.crearPedido();
+        if (pedido) {
+          RiveraSound.modal.abrir(
+            '<div style="text-align:center;">' +
+            '<div style="font-size:4rem;margin-bottom:16px;">&#9989;</div>' +
+            '<h3 style="color:var(--color-exito);margin-bottom:12px;">&#161;Pedido confirmado!</h3>' +
+            '<p style="color:var(--color-gris);margin-bottom:8px;">Tu pedido <strong>#' + pedido.id + '</strong></p>' +
+            '<p style="color:var(--color-gris);margin-bottom:20px;">Total: ' + RiveraSound.utils.formatearPrecio(pedido.total) + '</p>' +
+            '<p style="color:var(--color-gris);margin-bottom:20px;">Estado: <strong>' + pedido.estado + '</strong></p>' +
+            '<button class="btn btn-primario" onclick="RiveraSound.modal.cerrar()">Cerrar</button>' +
+            '</div>',
+            'Compra exitosa'
+          );
+          self.vaciar();
         }
       });
     }

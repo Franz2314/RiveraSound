@@ -1,101 +1,67 @@
-# RiveraSound - Documentación del Proyecto
+# RiveraSound - Documentacion del Proyecto
 
-## 📋 Descripción General
+## Descripcion General
 
-RiveraSound es un sitio web de comercio electrónico para una tienda de instrumentos musicales (Importaciones Rivera S.A.C.). 
-Es una Single Page Application (SPA) con backend en Node.js/Express y tres bases de datos.
+RiveraSound es un sitio web de comercio electronico para una tienda de instrumentos musicales (Importaciones Rivera S.A.C.).
+Es una Single Page Application (SPA) que funciona completamente del lado del cliente (frontend),
+con persistencia de datos en localStorage del navegador. No requiere servidor backend ni bases de datos.
 
 ---
 
-## 🏗️ Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 RiveraSound/
-├── Index.html                    # Punto de entrada SPA (carga header, footer, modales, scripts)
 ├── PaginasHTML/                  # Fragmentos HTML parciales inyectados por el router
-│   ├── Index/Index.html          # (Archivo principal, no es snippet)
-│   ├── Blog/blog.html            # Blog musical (artículos dinámicos)
-│   ├── Catalogo/catalogo.html    # Catálogo de instrumentos con filtros
+│   ├── Index/Index.html          # Pagina principal del SPA (entry point)
+│   ├── Blog/blog.html            # Blog musical (articulos dinamicos)
+│   ├── Catalogo/catalogo.html    # Catalogo de instrumentos con filtros
 │   ├── Compras/carrito.html      # Carrito de compras
 │   ├── Contacto/contacto.html    # Formulario de contacto + tabla de horarios
 │   ├── Cuenta/cuenta.html        # Login, registro, perfil y pedidos (tabs)
-│   ├── Nosotros/nosotros.html    # Información de la empresa con contadores
+│   ├── Nosotros/nosotros.html    # Informacion de la empresa con contadores
 │   └── Ofertas/ofertas.html      # Productos en oferta (< S/1000)
 ├── css/
 │   ├── style.css                 # Variables CSS, reset, layout, dark mode, responsive
-│   ├── menu.css                  # Header, logo, menú responsive y hamburguesa
+│   ├── menu.css                  # Header, logo, menu responsive y hamburguesa
 │   ├── modal.css                 # Modales, notificaciones toast, sidebar del carrito
 │   ├── animaciones.css           # Keyframes, scroll reveal, hover effects
 │   └── grid-flex.css             # Clases utilitarias Grid y Flexbox
 ├── js/
 │   ├── utils.js                  # Utilidades: notificaciones, debounce, DOM helpers
-│   ├── api.js                    # Capa de comunicación con el backend REST
-│   ├── validaciones.js           # Validación de formularios en tiempo real
-│   ├── carrito.js                # Gestión del carrito de compras (localStorage + API)
+│   ├── validaciones.js           # Validacion de formularios en tiempo real
+│   ├── carrito.js                # Gestion del carrito + historial de pedidos (localStorage)
 │   ├── modal.js                  # Sistema de modales (abrir/cerrar/Escape)
-│   ├── menu.js                   # Menú hamburguesa responsive
-│   ├── catalogo.js              # Catálogo, ofertas, blog y destacados
-│   ├── router.js                 # Enrutador SPA por hash (#)
+│   ├── menu.js                   # Menu hamburguesa responsive
+│   ├── catalogo.js               # Catalogo, ofertas, blog y destacados (datos hardcodeados)
+│   ├── router.js                 # Enrutador SPA por hash (#) + login/registro local
+│   ├── theme.js                  # Modo claro/oscuro y boton volver arriba
 │   └── app.js                    # Punto de entrada: inicializa todo
-├── img/                          # Imágenes de productos (descargadas de GitHub)
-├── backend/
-│   ├── server.js                 # Servidor Express + montaje de rutas
-│   ├── package.json              # Dependencias Node.js
-│   ├── Dockerfile                # Build para contenedor
-│   ├── .env                      # Variables de entorno (BBDD, JWT, puerto)
-│   ├── config/
-│   │   ├── postgres.js           # Pool de conexiones PostgreSQL
-│   │   ├── mongodb.js            # Conexión Mongoose MongoDB
-│   │   └── cassandra.js          # Cliente Cassandra
-│   ├── models/
-│   │   ├── postgres/esquema.sql  # DDL completo (categorias, productos, usuarios, pedidos, carrito)
-│   │   ├── mongo/modelos.js      # Schemas Mongoose (Producto, Blog, Resena)
-│   │   └── cassandra/inicializacion.cql  # Keyspace y tablas Cassandra
-│   ├── controllers/
-│   │   ├── productosController.js
-│   │   ├── usuariosController.js
-│   │   ├── pedidosController.js
-│   │   ├── blogController.js
-│   │   └── carritoController.js
-│   ├── routes/
-│   │   ├── productos.js
-│   │   ├── usuarios.js
-│   │   ├── pedidos.js
-│   │   ├── blog.js
-│   │   └── carrito.js
-│   └── data/
-│       └── productosFallback.js  # Datos mock para cuando PostgreSQL no está disponible
-├── docker-compose.yml            # Orquestación: Postgres + MongoDB + Cassandra + App
-├── .env                          # API Keys (XAI, ANTHROPIC, OPENAI, etc.)
+├── img/                          # Imagenes de productos
+├── DOCUMENTACION.md              # Este archivo
 ├── .gitignore
-└── DOCUMENTACION.md              # Este archivo
+└── .idea/                        # Configuracion del IDE
 ```
 
 ---
 
-## 🚀 Tecnologías Utilizadas
+## Tecnologias Utilizadas
 
 ### Frontend
-- **HTML5** - Estructura semántica con meta tags, formularios, tablas, multimedia
-- **CSS3** - Flexbox, Grid, animaciones, transiciones, diseño responsivo, dark mode
-- **JavaScript (Vanilla)** - SPA Router, DOM manipulation, Fetch API, localStorage
+- **HTML5** - Estructura semantica con meta tags, formularios, tablas
+- **CSS3** - Flexbox, Grid, animaciones keyframes, transiciones, diseno responsivo, modo claro/oscuro
+- **JavaScript (Vanilla)** - SPA Router, manipulacion del DOM, LocalStorage, Fetch API, Intersection Observer
 
-### Backend
-- **Node.js** + **Express 5** - API RESTful
-- **PostgreSQL 16** - Datos transaccionales (productos, usuarios, pedidos, carrito)
-- **MongoDB 7** - Documentos (blog, reseñas, catálogo extendido)
-- **Cassandra 5** - Alta escritura (logs de vistas, sesiones, carritos abandonados)
-
-### Infraestructura
-- **Docker** + **Docker Compose** - Contenedores para desarrollo y producción
-- **JWT** - Autenticación basada en tokens (pendiente implementación completa)
+### Persistencia
+- **localStorage** - Almacenamiento local en el navegador para: carrito de compras, usuarios registrados,
+  historial de pedidos y preferencia de tema (claro/oscuro)
 
 ---
 
-## 🎨 Sistema de CSS Modular
+## Sistema de CSS Modular
 
-El CSS está diseñado para ser **modular por página y por componente**. Cada tarjeta, 
-título, botón o badge puede tener su propio color sin afectar a los demás.
+El CSS esta disenado para ser modular por pagina y por componente. Cada tarjeta,
+titulo, boton o badge puede tener su propio color sin afectar a los demas.
 
 ### Variables Globales
 ```css
@@ -103,139 +69,63 @@ título, botón o badge puede tener su propio color sin afectar a los demás.
   --color-acento: #e8b84b;           /* Dorado global */
   --color-principal: #1a1a2e;        /* Fondo oscuro */
   --fuente-titulo: 'Georgia', serif;
-  /* ... más variables base ... */
 }
 ```
 
-### Variables Modulares por Componente
-```css
-:root {
-  --page-acento: var(--color-acento);           /* Color de acento de la página actual */
-  --card-border-color: var(--color-acento);     /* Borde superior de tarjetas */
-  --card-titulo-color: var(--color-principal);  /* Color del título en tarjetas */
-  --card-precio-color: var(--color-acento);     /* Color del precio */
-  --card-hover-color: var(--color-acento);      /* Color al hacer hover */
-  --section-title-color: var(--color-principal);/* Color del título de sección */
-  --btn-primario-bg: var(--color-acento);       /* Fondo del botón primario */
-  /* ... más variables ... */
-}
-```
-
-### Personalización por Página
-Se usa el atributo `data-page` en `<body>` para cambiar los colores por sección:
+### Personalizacion por Pagina
+Se usa el atributo `data-page` en `<body>` para cambiar los colores por seccion:
 
 ```css
-/* Catálogo - Azul */
-body[data-page="instrumentos"] {
-  --card-border-color: #4a90d9;
-  --page-acento: #4a90d9;
-}
-
-/* Ofertas - Rojo */
-body[data-page="ofertas"] {
-  --card-border-color: #e74c3c;
-  --page-acento: #e74c3c;
-}
-```
-
-### Personalización por Elemento (Inline)
-Cada tarjeta/caja puede tener su propio color inline:
-```html
-<div class="tarjeta" style="--card-border-color: #ff6600; --card-hover-color: #ff6600;">
+body[data-page="instrumentos"] { --card-border-color: #4a90d9; --page-acento: #4a90d9; }
+body[data-page="ofertas"]     { --card-border-color: #e74c3c; --page-acento: #e74c3c; }
 ```
 
 ---
 
-## 🗄️ Base de Datos
+## Autenticacion (Login Local)
 
-### PostgreSQL (Principal)
-| Tabla | Descripción |
-|-------|-------------|
-| `categorias` | Categorías de instrumentos (viento, cuerda, percusión, teclado) |
-| `productos` | Catálogo de instrumentos con precio, stock, marca |
-| `usuarios` | Cuentas de usuario con hash PBKDF2 |
-| `pedidos` | Cabecera de pedidos con estado y total |
-| `detalle_pedidos` | Líneas de cada pedido (producto, cantidad, subtotal) |
-| `carrito_items` | Carrito de compras por usuario (con FK a productos) |
-| `stock_log` | Historial de cambios de stock |
+El sistema de login funciona 100% en el navegador usando localStorage:
 
-### MongoDB (Documental)
-| Colección | Descripción |
-|-----------|-------------|
-| `Producto` | Catálogo extendido con especificaciones, imágenes, tags |
-| `Blog` | Artículos del blog con contenido HTML |
-| `Resena` | Reseñas de productos con puntuación 1-5 |
-
-### Cassandra (Alta escritura)
-| Tabla | Descripción |
-|-------|-------------|
-| `sesiones` | Sesiones de usuario (token, expiración) |
-| `logs_vistas_producto` | Logs de visitas a productos |
-| `carritos_abandonados` | Carritos no finalizados |
-| `notificaciones` | Notificaciones push |
-
----
-
-## 🔐 Autenticación (Login)
-
-El sistema de login usa:
-1. **Frontend**: Formulario en `cuenta.html` → JS llama a `POST /api/usuarios/login`
-2. **Backend**: `usuariosController.login` verifica hash PBKDF2 contra PostgreSQL
-3. **Token**: Se genera token aleatorio de 32 bytes (pendiente migrar a JWT)
-4. **Sesión**: El token se guarda en `localStorage` como `riverasound_token`
-5. **Perfil**: Los datos del usuario se cachean en `localStorage` como `riverasound_usuario`
+1. **Usuario demo**: `demo@riverasound.pe` / `demo123` (hardcodeado)
+2. **Registro**: Los nuevos usuarios se guardan en `localStorage` como `riverasound_usuarios`
+3. **Sesion**: Al iniciar sesion, los datos del usuario se guardan en `riverasound_usuario`
+4. **Persistencia**: La sesion se mantiene al recargar la pagina
 
 Flujo:
 ```
-Login → API (verificar hash) → Token → localStorage → Badge carrito → Navegación
+Login → Validar contra localStorage → Guardar sesion → Mostrar perfil → Navegacion
 ```
 
 ---
 
-## 🛒 Carrito de Compras
+## Carrito de Compras y Pedidos
 
-### Funcionamiento
-1. **Modo Local (sin login)**: Usa `localStorage` con clave `riverasound_carrito`
-2. **Modo API (con login)**: Sincroniza con `carrito_items` en PostgreSQL vía REST API
-3. **Transición**: Cuando el usuario inicia sesión, el carrito local se sincroniza con el del servidor
+### Carrito
+- Usa `localStorage` con clave `riverasound_carrito`
+- Array de objetos con: id, nombre, marca, precio, emoji, cantidad
+- Operaciones: agregar, eliminar, sumar/restar cantidad, vaciar
+- Total calculado como: `sum(precio * cantidad)`
 
-### Endpoints API
-| Método | Ruta | Descripción |
-|--------|------|-------------|
-| GET | `/api/carrito` | Lista todos los items del carrito del usuario |
-| POST | `/api/carrito` | Agrega un producto (body: `{producto_id, cantidad}`) |
-| PUT | `/api/carrito/:id` | Actualiza cantidad de un item |
-| DELETE | `/api/carrito/:id` | Elimina un item del carrito |
-| DELETE | `/api/carrito` | Vacía todo el carrito |
-| GET | `/api/carrito/total` | Obtiene total, items y unidades |
-
-### Array List
-El carrito maneja un array de objetos con la siguiente estructura:
-```javascript
-{
-  id: "sax-alto-yamaha",     // ID del producto (slug)
-  carritoId: 5,               // ID en la tabla carrito_items (cuando usa API)
-  nombre: "Saxofón Alto",     // Nombre del producto
-  marca: "Yamaha YAS-280",    // Marca / modelo
-  precio: 2850,               // Precio unitario
-  emoji: "🎷",                // Emoji representativo
-  cantidad: 2,                // Cantidad seleccionada
-  stock: "disponible"         // Estado del stock
-}
-```
-El total se calcula como: `sum(precio * cantidad)` de cada item.
+### Pedidos (Historial Local)
+- Al realizar una compra, se genera un pedido con:
+  - ID unico (ej: `PED-XXXX-XXXX`)
+  - Fecha, items, total
+  - Estado inicial: "Pendiente"
+- Se guarda en `localStorage` como `riverasound_pedidos`
+- Se pueden cambiar los estados: Pendiente, En envío, Entregado, Recogido en tienda, Cancelado
+- Visibles en "Mis Pedidos" dentro de la seccion Cuenta
 
 ---
 
-## 🌐 Enrutamiento SPA
+## Enrutamiento SPA
 
-El router (`js/router.js`) escucha cambios en el hash de la URL (`#`) y carga el 
-HTML parcial correspondiente dentro de `<div id="app">` sin recargar la página.
+El router (`js/router.js`) escucha cambios en el hash de la URL (`#`) y carga el
+HTML parcial correspondiente dentro de `<div id="app">` sin recargar la pagina.
 
 | Hash | Vista | Archivo HTML |
 |------|-------|-------------|
-| `#inicio` | Página principal | Renderizado inline |
-| `#instrumentos` | Catálogo | `PaginasHTML/Catalogo/catalogo.html` |
+| `#inicio` | Pagina principal | Renderizado inline |
+| `#instrumentos` | Catalogo | `PaginasHTML/Catalogo/catalogo.html` |
 | `#ofertas` | Ofertas | `PaginasHTML/Ofertas/ofertas.html` |
 | `#nosotros` | Nosotros | `PaginasHTML/Nosotros/nosotros.html` |
 | `#contacto` | Contacto | `PaginasHTML/Contacto/contacto.html` |
@@ -249,52 +139,57 @@ HTML parcial correspondiente dentro de `<div id="app">` sin recargar la página.
 
 ---
 
-## ⚙️ Instalación y Ejecución
+## Instalacion y Ejecucion
 
-### Desarrollo (con Docker)
+### Opcion 1: Servidor HTTP (Python)
 ```bash
-# Clonar repositorio
-git clone https://github.com/Franz2314/Proyectito-1.git
 cd RiveraSound
-
-# Iniciar todos los servicios
-docker compose up -d
-
-# Acceder
-# Frontend: http://localhost:3000
-# API: http://localhost:3000/api
+python3 -m http.server 8080
+# Abrir: http://localhost:8080/PaginasHTML/Index/Index.html
 ```
 
-### Desarrollo (sin Docker)
+### Opcion 2: Servidor HTTP (Node.js)
 ```bash
-# Requisitos: Node.js 20+, PostgreSQL 16+, MongoDB 7+, Cassandra 5+
-
-# Instalar dependencias
-cd backend && npm install
-
-# Configurar .env (ver backend/.env.example)
-# Iniciar servidor
-npm start
+cd RiveraSound
+npx serve .
+# Abrir: http://localhost:3000
 ```
+
+### Opcion 3: Abrir directamente
+Solo funciona con servidor HTTP (no usar file://). El SPA necesita fetch() para cargar los partials HTML.
 
 ---
 
-## 📝 Notas Adicionales
+## Funcionalidades Principales
 
-### Sobre las Imágenes
-Las imágenes de productos se almacenan en `/img/` y se sirven como estáticas 
-desde la raíz del proyecto. Se mapean por ID del producto en `catalogo.js`.
+- **Catalogo interactivo**: 38 productos en 4 categorias (Viento, Cuerda, Percusion, Teclado) con filtros y busqueda en tiempo real
+- **Carrito de compras**: Sidebar deslizante, badge con contador, persistencia en localStorage
+- **Autenticacion**: Login con usuario demo y registro de nuevos usuarios (todo local)
+- **Historial de pedidos**: Visualizacion y cambio de estados (Pendiente, En envio, Entregado, Recogido, Cancelado)
+- **Modo claro/oscuro**: Alternable con persistencia de preferencia
+- **Formularios con validacion**: Validacion en tiempo real con feedback visual (clases .error y .success)
+- **Blog**: Articulos musicales con apertura en modal
+- **Diseno responsivo**: 4 breakpoints (1401, 900, 600, 400px) con menu hamburguesa en movil
+- **Animaciones**: Scroll reveal, contadores incrementales, hover effects, transiciones
+- **Feedback**: Boton flotante en pagina de contacto para enviar comentarios
+- **Modal de compra**: Confirmacion visual al realizar un pedido
+
+---
+
+## Notas Adicionales
+
+### Sobre las Imagenes
+Las imagenes de productos se almacenan en `/img/` y se mapean por ID del producto en `catalogo.js`.
 
 ### Sobre el Dark Mode
-El sitio detecta automáticamente la preferencia del sistema (`prefers-color-scheme`)
-y adapta los colores. Los elementos con `--card-fondo`, `--color-blanco`, etc.
-se ajustan con el media query correspondiente.
+El sitio detecta automaticamente la preferencia del sistema (`prefers-color-scheme`)
+y adapta los colores. El boton de cambio de tema permite alternar manualmente.
 
 ### Sobre los Contadores Animados
-En la página "Nosotros", los contadores numéricos (años, instrumentos vendidos, etc.)
+En la pagina "Nosotros", los contadores numericos (anos, instrumentos vendidos, etc.)
 usan IntersectionObserver para animarse desde 0 hasta su valor objetivo cuando
 son visibles en pantalla.
 
 ### Sobre el Scroll Reveal
-Los elementos con clase `.reveal` aparecen con animación fade-in cuando
+Los elementos con clase `.reveal` aparecen con animacion fade-in cuando
 entran al viewport, usando IntersectionObserver para eficiencia.
