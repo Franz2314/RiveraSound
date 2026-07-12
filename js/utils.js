@@ -1,138 +1,185 @@
-/* ============================================ utils.js - Utilidades generales, animaciones reveal y contadores ============================================ */
+/* Módulos de Utilidades, Animaciones y Contadores */
 
+// Declaramos el objeto global RiveraSound si no existe para evitar sobreescribir datos
 var RiveraSound = RiveraSound || {};
 
-/* ============ RIVERSOUND.UTILS - Funciones auxiliares ============ */
-
-/**
- * RiveraSound.utils - Utilidades generales para todo el frontend.
- * Incluye notificaciones, debounce, selectores abreviados, creador de elementos DOM y formateo de precios.
- */
+/* Riversound.utils - funciones auxiliares del dom */
 RiveraSound.utils = {
 
-  /** notificar - Muestra una notificación toast flotante que desaparece tras 3 segundos.
-   *  @param {string} mensaje - Texto a mostrar.
-   *  @param {string} [tipo='info'] - Clase CSS: 'exito', 'error', 'info', 'warning'.
+  /**
+   * notificar: Muestra un aviso flotante (Toast) en la pantalla por 3 segundos.
+   * @param {string} mensaje - El texto que se va a mostrar.
+   * @param {string} tipo - El tipo de alerta ('exito', 'error', 'info').
    */
-  notificar: function (mensaje, tipo) {
-    tipo = tipo || 'info';
-    var n = document.createElement('div');
-    n.className = 'notificacion ' + tipo;
+  notificar(mensaje, tipo = 'info') {
+    // Creamos dinámicamente un elemento <div> en el DOM
+    const n = document.createElement('div');
+    
+    // Le asignamos sus clases de estilo CSS
+    n.className = `notificacion ${tipo}`;
     n.textContent = mensaje;
+    
+    // Lo agregamos directamente al cuerpo del documento (body)
     document.body.appendChild(n);
-    setTimeout(function () {
-      if (n.parentNode) n.parentNode.removeChild(n);
+    
+    // Programamos su remoción automática después de 3000ms (3 segundos)
+    setTimeout(() => {
+      if (n.parentNode) {
+        n.parentNode.removeChild(n); // Lo eliminamos del DOM de manera segura
+      }
     }, 3000);
   },
 
-  /** debounce - Limita la frecuencia de ejecución de una función (útil para búsqueda en tiempo real, resize, etc.).
-   *  @param {function} fn - Función a ejecutar.
-   *  @param {number} [ms=300] - Milisegundos de espera.
-   *  @returns {function} - Función con debounce.
+  /**
+   * debounce: Retrasa la ejecución de una función hasta que haya pasado un tiempo.
+   * Evita sobrecargar la web con ejecuciones múltiples en eventos rápidos (como escribir en búsquedas).
+   * @param {function} fn - La función que queremos retrasar.
+   * @param {number} ms - Milisegundos de espera (por defecto 300ms).
+   * @returns {function} - La función envuelta lista para su uso.
    */
-  debounce: function (fn, ms) {
-    var timer;
-    return function () {
-      var ctx = this, args = arguments;
-      clearTimeout(timer);
-      timer = setTimeout(function () { fn.apply(ctx, args); }, ms || 300);
+  debounce(fn, ms = 300) {
+    let timer; // Almacenará la referencia del temporizador en curso
+    return function (...args) {
+      const ctx = this;
+      clearTimeout(timer); // Cancelamos el temporizador anterior si se vuelve a presionar una tecla rápido
+      timer = setTimeout(() => {
+        fn.apply(ctx, args); // Ejecuta la función original una vez transcurrido el tiempo
+      }, ms);
     };
   },
 
-  /** $ - Atajo para document.querySelector. */
-  $: function (sel, ctx) { return (ctx || document).querySelector(sel); },
-
-  /** $$ - Atajo para document.querySelectorAll. */
-  $$: function (sel, ctx) { return (ctx || document).querySelectorAll(sel); },
-
-  /** crearElemento - Crea un elemento DOM con atributos e hijos de forma declarativa.
-   *  @param {string} tag - Etiqueta HTML (ej: 'div', 'h3').
-   *  @param {object} [attrs] - Atributos del elemento (className, textContent, innerHTML, etc.).
-   *  @param {Array} [hijos] - Array de nodos hijos (strings o HTMLElements).
-   *  @returns {HTMLElement}
+  /**
+   * $: Atajo para seleccionar un único elemento del DOM (sustituye a document.querySelector).
+   * @param {string} sel - Selector CSS (ej: '#id', '.clase').
+   * @param {HTMLElement} ctx - Contexto de búsqueda opcional (por defecto document).
+   * @returns {HTMLElement|null}
    */
-  crearElemento: function (tag, attrs, hijos) {
-    var el = document.createElement(tag);
+  $(sel, ctx = document) {
+    return ctx.querySelector(sel);
+  },
+
+  /**
+   * $$: Atajo para seleccionar múltiples elementos del DOM (document.querySelectorAll).
+   * @param {string} sel - Selector CSS.
+   * @param {HTMLElement} ctx - Contexto de búsqueda opcional.
+   * @returns {NodeList}
+   */
+  $$(sel, ctx = document) {
+    return ctx.querySelectorAll(sel);
+  },
+
+  /**
+   * crearElemento: Crea y retorna un nodo HTML con atributos y nodos hijos de forma sencilla.
+   * @param {string} tag - Nombre de la etiqueta HTML (ej: 'div', 'h3').
+   * @param {object} attrs - Atributos opcionales (className, textContent, style, etc.).
+   * @param {Array} hijos - Array de nodos hijos (pueden ser strings o elementos DOM).
+   * @returns {HTMLElement}
+   */
+  crearElemento(tag, attrs, hijos) {
+    const el = document.createElement(tag);
+    
+    // Si se especificaron atributos, los recorremos y asignamos al elemento
     if (attrs) {
-      Object.keys(attrs).forEach(function (k) {
-        if (k === 'className') el.className = attrs[k];
-        else if (k === 'textContent') el.textContent = attrs[k];
-        else if (k === 'innerHTML') el.innerHTML = attrs[k];
-        else el.setAttribute(k, attrs[k]);
+      Object.keys(attrs).forEach((k) => {
+        if (k === 'className') {
+          el.className = attrs[k]; // Asignación directa de clase
+        } else if (k === 'textContent') {
+          el.textContent = attrs[k]; // Asignación directa de texto plano
+        } else if (k === 'innerHTML') {
+          el.innerHTML = attrs[k]; // Asignación directa de contenido HTML
+        } else {
+          el.setAttribute(k, attrs[k]); // Atributos estándar de etiqueta
+        }
       });
     }
+    
+    // Si hay elementos o textos hijos, los agregamos en orden
     if (hijos) {
-      hijos.forEach(function (h) {
-        if (typeof h === 'string') el.appendChild(document.createTextNode(h));
-        else if (h) el.appendChild(h);
+      hijos.forEach((h) => {
+        if (typeof h === 'string') {
+          el.appendChild(document.createTextNode(h)); // Inyección de texto plano
+        } else if (h) {
+          el.appendChild(h); // Inyección de nodo HTML hijo
+        }
       });
     }
+    
     return el;
   },
 
-  /** formatearPrecio - Formatea un número como precio en soles peruanos (S/ 1,234).
-   *  @param {number} num - Valor numérico.
-   *  @returns {string}
+  /**
+   * formatearPrecio: Da formato monetario peruano a un número (ej: 2850 -> S/ 2,850.00).
+   * @param {number} num - El valor numérico.
+   * @returns {string}
    */
-  formatearPrecio: function (num) {
-    return 'S/ ' + num.toLocaleString('es-PE');
+  formatearPrecio(num) {
+    return 'S/ ' + num.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 };
 
-/* ============ RIVERSOUND.REVEAL - Animaciones de aparición al hacer scroll ============ */
-
-/**
- * RiveraSound.reveal - Activa animaciones de entrada (fade-in/deslizamiento)
- * cuando los elementos con clase .reveal, .reveal-left o .reveal-right entran al viewport.
- * Usa IntersectionObserver para eficiencia. Si no hay soporte, los muestra todos de una vez.
- */
+/* Riversound.reveal - animaciones de scroll */
 RiveraSound.reveal = {
-  iniciar: function () {
-    var els = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
-    if (els.length > 0 && 'IntersectionObserver' in window) {
-      var obs = new IntersectionObserver(function (entries) {
-        entries.forEach(function (e) {
+  /**
+   * iniciar: Busca elementos con la clase .reveal y los anima cuando entran en la pantalla.
+   * Utiliza la API moderna IntersectionObserver. Si no es compatible, muestra las tarjetas de golpe.
+   */
+  iniciar() {
+    const elementos = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+    
+    // Si el navegador soporta IntersectionObserver, observamos la visibilidad de los elementos
+    if (elementos.length > 0 && 'IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((e) => {
           if (e.isIntersecting) {
-            e.target.classList.add('visible');  // Activa la animación CSS
-            obs.unobserve(e.target);             // Deja de observar para mejorar performance
+            e.target.classList.add('visible'); // Activa la animación CSS (.visible)
+            observer.unobserve(e.target);      // Deja de observar para mejorar el rendimiento del navegador
           }
         });
-      }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }); // Aparece cuando el 15% del elemento es visible
-      els.forEach(function (el) { obs.observe(el); });
+      }, { threshold: 0.15, rootMargin: '0px 0px -50px 0px' }); // Comienza la animación al ver el 15% del elemento
+      
+      elementos.forEach((el) => observer.observe(el));
     } else {
-      els.forEach(function (el) { el.classList.add('visible'); }); // Fallback: muestra todo si no hay soporte
+      // Caso de respaldo (fallback) para navegadores antiguos: los mostramos inmediatamente
+      elementos.forEach((el) => el.classList.add('visible'));
     }
   }
 };
 
-/* ============ RIVERSOUND.CONTADORES - Animación de números incrementales ============ */
-
-/**
- * RiveraSound.contadores - Anima elementos con clase .contador-numero
- * haciendo que el número aumente desde 0 hasta su valor data-target cuando son visibles.
- * La animación dura 2 segundos.
- */
+/* Riversound.contadores - números animados incrementales */
 RiveraSound.contadores = {
-  iniciar: function () {
-    var els = document.querySelectorAll('.contador-numero');
-    if (els.length === 0 || !('IntersectionObserver' in window)) return;
-    var obs = new IntersectionObserver(function (entries) {
-      entries.forEach(function (e) {
+  /**
+   * iniciar: Anima textos con la clase .contador-numero para que suban desde 0
+   * hasta el valor especificado en el atributo 'data-target'.
+   */
+  iniciar() {
+    const contadores = document.querySelectorAll('.contador-numero');
+    if (contadores.length === 0 || !('IntersectionObserver' in window)) return;
+    
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
         if (e.isIntersecting) {
-          var el = e.target;
-          var target = parseInt(el.getAttribute('data-target'), 10) || 0;
-          var start = performance.now();
-          function tick(now) {
-            var p = Math.min((now - start) / 2000, 1); // Progreso de 0 a 1 en 2 segundos
-            el.textContent = Math.floor(p * target).toLocaleString();
-            if (p < 1) requestAnimationFrame(tick);
-            else el.textContent = target.toLocaleString(); // Valor final exacto
+          const el = e.target;
+          const target = parseInt(el.getAttribute('data-target'), 10) || 0;
+          const startTime = performance.now();
+          const duracion = 2000; // Duración de la animación (2 segundos)
+          
+          function animar(currentTime) {
+            const progreso = Math.min((currentTime - startTime) / duracion, 1);
+            el.textContent = Math.floor(progreso * target).toLocaleString();
+            
+            if (progreso < 1) {
+              requestAnimationFrame(animar); // Siguiente frame de animación
+            } else {
+              el.textContent = target.toLocaleString(); // Asegura el valor exacto final
+            }
           }
-          requestAnimationFrame(tick);
-          obs.unobserve(el);
+          
+          requestAnimationFrame(animar);
+          observer.unobserve(el); // Deja de observar tras finalizar la animación
         }
       });
-    }, { threshold: 0.5 }); // El 50% del elemento debe estar visible para iniciar
-    els.forEach(function (el) { obs.observe(el); });
+    }, { threshold: 0.5 }); // Inicia al ser visible el 50% del contador
+    
+    contadores.forEach((el) => observer.observe(el));
   }
 };

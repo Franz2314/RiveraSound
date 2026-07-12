@@ -1,0 +1,315 @@
+/* Media Queries y Estilos Adaptativos */
+
+/* Media queries - responsive */
+
+/* Tablet (601px - 900px) */
+@media (max-width: 900px) {
+  .hero {
+    padding: 70px 20px;
+  }
+
+  .hero h1 {
+    font-size: 2.3rem;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  section {
+    padding: 50px 20px;
+  }
+
+  .titulo-seccion {
+    font-size: 1.8rem;
+  }
+
+  .grid-tarjetas {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+  }
+
+  .form-contenedor {
+    padding: 30px;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+  }
+
+  .seccion-nosotros-intro {
+    gap: 30px;
+  }
+
+  .banner-cta h2 {
+    font-size: 1.6rem;
+  }
+
+  .tarjeta {
+    padding: 24px 20px;
+  }
+}
+
+/* Mobile (max 600px) */
+@media (max-width: 600px) {
+  .btn-menu {
+    display: flex;
+  }
+
+  #menuNav {
+    position: fixed;
+    top: 70px;
+    left: 0;
+    right: 0;
+    background-color: var(--color-principal);
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-120%);
+    opacity: 0;
+    transition: transform 0.4s ease, opacity 0.4s ease;
+    z-index: 999;
+  }
+
+  #menuNav.visible {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  #menuNav ul {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  #menuNav ul li a {
+    display: block;
+    padding: 14px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  #menuNav ul li a:hover {
+    padding-left: 20px;
+  }
+
+  .hero {
+    padding: 50px 20px;
+  }
+
+  .hero h1 {
+    font-size: 1.7rem;
+  }
+
+  .hero p {
+    font-size: 0.95rem;
+  }
+
+  .hero-botones {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .hero-botones .btn {
+    width: 100%;
+    max-width: 250px;
+    text-align: center;
+  }
+
+  section {
+    padding: 40px 20px;
+  }
+
+  .titulo-seccion {
+    font-size: 1.5rem;
+  }
+
+  .grid-tarjetas {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .form-fila-doble {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .form-contenedor {
+    padding: 22px;
+  }
+
+  .tarjeta {
+    padding: 22px 18px;
+  }
+
+  .page-header {
+    padding: 40px 20px;
+  }
+
+  .page-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .seccion-nosotros-intro {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .nosotros-emoji {
+    font-size: 4rem;
+  }
+
+  .footer-contenido {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+
+  .footer-col h4::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .footer-col ul li:hover {
+    transform: none;
+  }
+
+  .banner-cta {
+    padding: 40px 20px;
+  }
+
+  .banner-cta h2 {
+    font-size: 1.3rem;
+  }
+
+  .tabla-contenedor {
+    border-radius: var(--radio);
+  }
+
+  table {
+    font-size: 0.8rem;
+  }
+
+  thead th,
+  tbody td {
+    padding: 10px 12px;
+  }
+
+  .filtros-catalogo {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .notificacion {
+    left: 20px;
+    right: 20px;
+    max-width: none;
+  }
+}
+
+/* Small mobile (max 400px) */
+@media (max-width: 400px) {
+  .hero h1 {
+    font-size: 1.4rem;
+  }
+
+  .logo-nombre {
+    font-size: 1.1rem;
+  }
+
+  .logo-slogan {
+    display: none;
+  }
+
+  .titulo-seccion {
+    font-size: 1.3rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.3rem;
+  }
+}
+
+/* High resolution (1401px+) */
+@media (min-width: 1401px) {
+  .header-contenido,
+  .contenedor,
+  .footer-contenido {
+    max-width: 1400px;
+  }
+
+  .hero {
+    padding: 130px 20px;
+  }
+
+  .hero h1 {
+    font-size: 3.8rem;
+  }
+
+  .hero p {
+    font-size: 1.3rem;
+    max-width: 600px;
+  }
+
+  section {
+    padding: 90px 20px;
+  }
+
+  .titulo-seccion {
+    font-size: 2.8rem;
+  }
+
+  .grid-tarjetas {
+    gap: 32px;
+  }
+
+  .tarjeta {
+    padding: 40px 32px;
+  }
+
+  .page-header {
+    padding: 80px 20px;
+  }
+
+  .page-header h1 {
+    font-size: 3.2rem;
+  }
+}
+
+/* Estilos adicionales del tema oscuro permanente */
+.tarjeta {
+  border-top-color: var(--color-acento);
+}
+
+.tarjeta p {
+  color: #aaa;
+}
+
+.lista-valores li {
+  border-bottom-color: #333;
+}
+
+.lista-valores li:hover {
+  color: var(--color-acento);
+}
+
+tbody tr:nth-child(even) {
+  background-color: #2a2a4a;
+}
+
+tbody td {
+  color: #ccc;
+}
+
+.form-contenedor {
+  background-color: #2a2a4a;
+}
+
+.form-grupo input,
+.form-grupo select,
+.form-grupo textarea {
+  background-color: #1a1a30;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+.seccion-nosotros-intro p {
+  color: #bbb !important;
+}
+

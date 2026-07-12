@@ -1,13 +1,13 @@
-<!-- ============================================ contacto.html - Formulario de contacto (snippet inyectado en #app) ============================================ -->
+<!-- Formulario de contacto -->
 
-<!-- ============ ENCABEZADO DE PÁGINA ============ -->
+<!-- Encabezado de página -->
 <div class="page-header">
   <h1>Contáctanos</h1>
   <p>Estamos aquí para ayudarte. ¡Escríbenos!</p>
 </div>
 
-<!-- ============ SECCIÓN: INFORMACIÓN DE CONTACTO ============ -->
-<section style="background-color: #f8f5f0;">
+<!-- Sección: información de contacto -->
+<section style="background-color: var(--color-secundario);">
   <div class="contenedor">
     <h2 class="titulo-seccion reveal">Información de contacto</h2>
     <span class="linea-dorada reveal"></span>
@@ -37,7 +37,7 @@
   </div>
 </section>
 
-<!-- ============ SECCIÓN: FORMULARIO DE CONTACTO ============ -->
+<!-- Sección: formulario de contacto -->
 <section>
   <div class="contenedor">
     <h2 class="titulo-seccion reveal">Envíanos un mensaje</h2>
@@ -45,7 +45,7 @@
     <p class="subtitulo-seccion reveal">Completa el formulario y te responderemos en menos de 24 horas.</p>
 
     <div class="form-contenedor reveal">
-      <!-- --- Formulario con validación HTML5 y JS (novalidate desactiva burbujas nativas) --- -->
+      <!-- Formulario con validación HTML5 y JS (novalidate desactiva burbujas nativas) -->
       <form action="#" method="post" id="formularioContacto" novalidate>
         <!-- Fila: Nombre + Apellido -->
         <div class="form-fila-doble">
@@ -70,8 +70,7 @@
           </div>
           <div class="form-grupo">
             <label for="telefono">Teléfono</label>
-            <!-- Input de teléfono con patrón de 9 dígitos (formato peruano) -->
-            <input type="tel" id="telefono" name="telefono" placeholder="987 654 321" pattern="[0-9]{9}">
+            <input type="tel" id="telefono" name="telefono" placeholder="987654321" pattern="[0-9]{9}" maxlength="9">
             <span class="error-msg"></span>
           </div>
         </div>
@@ -128,7 +127,7 @@
         </div>
       </form>
 
-      <!-- --- Mensaje de éxito visible tras el envío (manejado por JS) --- -->
+      <!-- Mensaje de éxito visible tras el envío (manejado por JS) -->
       <div id="mensajeExito" class="mensaje-exito">
         ✅ <strong>¡Mensaje enviado!</strong> Gracias por contactarnos. Te responderemos pronto.
       </div>
@@ -136,8 +135,62 @@
   </div>
 </section>
 
-<!-- ============ SECCIÓN: TABLA DE HORARIOS DETALLADOS ============ -->
-<section style="background-color: #f8f5f0;">
+<!-- Sección: formulario de pedido especial / importación -->
+<section style="border-top: 1px solid #eee;">
+  <div class="contenedor">
+    <h2 class="titulo-seccion reveal">Solicitud de Pedido Especial / Importación</h2>
+    <span class="linea-dorada reveal"></span>
+    <p class="subtitulo-seccion reveal">¿No encuentras el instrumento que buscas? Solicita su importación bajo pedido especial.</p>
+
+    <div class="form-contenedor reveal">
+      <form id="formularioImportacion" novalidate>
+        <div class="form-fila-doble">
+          <div class="form-grupo">
+            <label for="importNombre">Nombre completo *</label>
+            <input type="text" id="importNombre" name="importNombre" placeholder="Tu nombre" required minlength="2" maxlength="50">
+            <span class="error-msg"></span>
+          </div>
+          <div class="form-grupo">
+            <label for="importCorreo">Correo electrónico *</label>
+            <input type="email" id="importCorreo" name="importCorreo" placeholder="ejemplo@correo.com" required>
+            <span class="error-msg"></span>
+          </div>
+        </div>
+
+        <div class="form-fila-doble">
+          <div class="form-grupo">
+            <label for="importInstrumento">Instrumento / Modelo solicitado *</label>
+            <input type="text" id="importInstrumento" name="importInstrumento" placeholder="Ej: Yamaha YAS-62 Saxofón Alto" required minlength="4">
+            <span class="error-msg"></span>
+          </div>
+          <div class="form-grupo">
+            <label for="importPresupuesto">Presupuesto estimado (S/.) *</label>
+            <input type="number" id="importPresupuesto" name="importPresupuesto" placeholder="Ej: 3500" required min="100">
+            <span class="error-msg"></span>
+          </div>
+        </div>
+
+        <div class="form-grupo">
+          <label for="importDetalles">Especificaciones / Detalles del pedido *</label>
+          <textarea id="importDetalles" name="importDetalles" placeholder="Describe los detalles, color, año de fabricación o especificaciones especiales..." required minlength="10" maxlength="1000"></textarea>
+          <span class="error-msg"></span>
+        </div>
+
+        <div style="display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px;">
+          <button type="submit" class="btn btn-primario">Enviar solicitud de importación</button>
+          <button type="reset" class="btn btn-secundario">Limpiar</button>
+        </div>
+      </form>
+
+      <div id="importExito" class="mensaje-exito" style="display:none; margin-top: 15px;">
+        ✅ <strong>¡Solicitud recibida!</strong> Hemos registrado tu solicitud de pedido especial. Un asesor se comunicará contigo para cotizar la importación.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Sección: tabla de horarios detallados -->
+<section style="background-color: var(--color-secundario);">
   <div class="contenedor">
     <h2 class="titulo-seccion reveal">Horarios de Atención Detallados</h2>
     <span class="linea-dorada reveal"></span>

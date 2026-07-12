@@ -1,0 +1,225 @@
+/* Estructuras de Maquetación y Cuadrículas */
+
+/* Contenedores y footer */
+/* Contenedores */
+.contenedor {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+section {
+  padding: 70px 20px;
+}
+
+.titulo-seccion {
+  font-family: var(--fuente-titulo);
+  font-size: 2.2rem;
+  color: var(--color-texto);
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.subtitulo-seccion {
+  text-align: center;
+  color: var(--color-gris);
+  margin-bottom: 40px;
+  font-size: 1rem;
+}
+
+.linea-dorada {
+  display: block;
+  width: 70px;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-acento), var(--color-acento-claro));
+  margin: 10px auto 35px;
+  border-radius: 2px;
+}
+
+
+/* Sección oscura */
+.seccion-oscura {
+  background-color: var(--color-principal);
+  color: var(--color-texto);
+}
+
+.seccion-oscura .titulo-seccion {
+  color: var(--color-acento);
+}
+
+.seccion-oscura .subtitulo-seccion {
+  color: #aaa;
+}
+
+
+/* Footer */
+footer {
+  background: linear-gradient(135deg, var(--color-principal), #0d0d1a);
+  color: #aaa;
+  padding: 50px 20px 20px;
+  border-top: 3px solid var(--color-acento);
+}
+
+.footer-contenido {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 35px;
+  margin-bottom: 30px;
+}
+
+.footer-col h4 {
+  color: var(--color-acento);
+  font-family: var(--fuente-titulo);
+  margin-bottom: 16px;
+  font-size: 1.1rem;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.footer-col h4::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background-color: var(--color-acento);
+}
+
+.footer-col p,
+.footer-col a {
+  font-size: 0.85rem;
+  line-height: 1.9;
+  color: #aaa;
+  transition: color var(--transicion);
+}
+
+.footer-col a:hover {
+  color: var(--color-acento);
+  padding-left: 4px;
+}
+
+.footer-col ul {
+  list-style: none;
+}
+
+.footer-col ul li {
+  transition: transform var(--transicion);
+}
+
+.footer-col ul li:hover {
+  transform: translateX(4px);
+}
+
+.footer-bottom {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #666;
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 22px;
+}
+
+
+/* Utilidades */
+.text-center { text-align: center; }
+.text-left { text-align: left; }
+.mt-20 { margin-top: 20px; }
+.mt-30 { margin-top: 30px; }
+.mb-0  { margin-bottom: 0; }
+
+
+/* --- CLASES UTILITARIAS GRID-FLEX (Original) --- */
+/* Grid-flex.css - clases utilitarias de grid y flexbox
+   layouts reutilizables con css grid (tarjetas, columnas fijas)
+   y flexbox (alineación, wraps, gaps) */
+
+/* Grid: tarjetas automáticas */
+/* Grilla responsive que crea columnas automáticamente según el espacio disponible.
+   Cada columna tiene un mínimo de 260px, se expande para llenar el espacio. */
+.grid-tarjetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 28px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Grid: columnas fijas */
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+
+.grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 28px;
+}
+
+/* Grid: automático con mínimos */
+/* Igual que grid-tarjetas pero con mínimo de 180px (ej. galería de thumbnails) */
+.grid-auto-180 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 28px;
+}
+
+/* Mínimo de 300px (ej. blog, cards grandes) */
+.grid-auto-300 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 28px;
+}
+
+/* Flexbox: alineación */
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Flex con wrap para que los hijos se apilen al reducir el ancho */
+.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+/* Flexbox: gaps */
+.flex-gap-16 { gap: 16px; }
+.flex-gap-20 { gap: 20px; }
+.flex-gap-30 { gap: 30px; }
+
+.flex-col { flex-direction: column; }
+
+/* Responsive */
+
+/* Tablets (<=900px): reduce columnas y gaps */
+@media (max-width: 900px) {
+  .grid-tarjetas { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); gap: 20px; } /* grid-3 y grid-4 pasan a 2 columnas */
+}
+
+/* Móviles (<=600px): todo a una columna */
+@media (max-width: 600px) {
+  .grid-tarjetas { grid-template-columns: 1fr; gap: 18px; }
+  .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; gap: 18px; }
+  .grid-auto-300 { grid-template-columns: 1fr; }
+}
+

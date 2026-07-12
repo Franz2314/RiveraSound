@@ -1,196 +1,73 @@
-:root {
-  --color-principal: #1a1a2e;
-  --color-secundario: #16213e;
-  --color-acento: #e8b84b;
-  --color-acento-claro: #f0d48a;
-  --color-texto: #f0f0f0;
-  --color-texto-oscuro: #222;
-  --color-fondo-claro: #f8f5f0;
-  --color-fondo-oscuro: #0f3460;
-  --color-gris: #888;
-  --color-blanco: #ffffff;
-  --color-error: #dc3545;
-  --color-exito: #28a745;
-  --color-info: #17a2b8;
-  --fuente-titulo: 'Georgia', 'Times New Roman', serif;
-  --fuente-cuerpo: 'Trebuchet MS', 'Verdana', sans-serif;
-  --sombra: 0 4px 15px rgba(0,0,0,0.15);
-  --sombra-fuerte: 0 8px 30px rgba(0,0,0,0.2);
-  --sombra-suave: 0 2px 8px rgba(0,0,0,0.08);
-  --radio: 8px;
-  --radio-lg: 12px;
-  --transicion: 0.3s ease;
-  --transicion-larga: 0.5s ease;
-}
+/* Componentes Específicos e Interactivos */
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
-html {
-  scroll-behavior: smooth;
-}
-
-body {
-  font-family: var(--fuente-cuerpo);
-  background-color: var(--color-fondo-claro);
-  color: var(--color-texto-oscuro);
-  line-height: 1.6;
-  overflow-x: hidden;
-}
-
-/* =============================================
-   KEYFRAME ANIMATIONS
-   ============================================= */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fadeInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-@keyframes rotateIn {
-  from {
-    opacity: 0;
-    transform: rotate(-180deg) scale(0.3);
-  }
-  to {
-    opacity: 1;
-    transform: rotate(0) scale(1);
-  }
-}
-
-@keyframes bounceIn {
-  0% { transform: scale(0); opacity: 0; }
-  50% { transform: scale(1.15); }
-  70% { transform: scale(0.95); }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes heroNote {
-  0%, 100% {
-    opacity: 0.05;
-    transform: translate(-50%, -50%) rotate(0deg) scale(1);
-  }
-  50% {
-    opacity: 0.08;
-    transform: translate(-50%, -50%) rotate(10deg) scale(1.1);
-  }
-}
-
-/* Scroll reveal classes */
-.reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.reveal-left {
-  opacity: 0;
-  transform: translateX(-40px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.reveal-left.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-.reveal-right {
-  opacity: 0;
-  transform: translateX(40px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-.reveal-right.visible {
-  opacity: 1;
-  transform: translateX(0);
-}
-
-img {
-  max-width: 100%;
-  display: block;
+/* Botones y componentes base */
+/* Botones */
+.btn {
+  display: inline-block;
+  padding: 12px 28px;
   border-radius: var(--radio);
-  transition: transform var(--transicion), box-shadow var(--transicion);
+  font-size: 0.9rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background-color var(--transicion), color var(--transicion), border-color var(--transicion), transform var(--transicion), box-shadow var(--transicion);
+  position: relative;
+  overflow: hidden;
 }
 
-img:hover {
-  transform: scale(1.02);
-  box-shadow: var(--sombra);
+.btn::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background-color: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s ease, height 0.6s ease;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
+.btn:active::after {
+  width: 300px;
+  height: 300px;
 }
 
-::selection {
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn:active {
+  transform: translateY(-1px);
+}
+
+.btn-primario {
+  background-color: var(--color-acento);
+  color: var(--color-principal);
+  border-color: var(--color-acento);
+}
+
+.btn-primario:hover {
+  background-color: var(--color-acento-claro);
+  border-color: var(--color-acento-claro);
+}
+
+.btn-secundario {
+  background-color: transparent;
+  color: var(--color-acento);
+  border-color: var(--color-acento);
+}
+
+.btn-secundario:hover {
   background-color: var(--color-acento);
   color: var(--color-principal);
 }
 
-/* =============================================
-   HEADER / NAV - RESPONSIVE
-   ============================================= */
+
+/* Header / nav - responsive */
 header {
   background-color: var(--color-principal);
   position: sticky;
@@ -321,9 +198,8 @@ header {
   transform: translateY(-7px) rotate(-45deg);
 }
 
-/* =============================================
-   HERO
-   ============================================= */
+
+/* Hero */
 .hero {
   background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 60%, var(--color-fondo-oscuro) 100%);
   color: var(--color-texto);
@@ -379,113 +255,8 @@ header {
   animation: fadeInUp 1s ease 0.6s both;
 }
 
-/* =============================================
-   BOTONES
-   ============================================= */
-.btn {
-  display: inline-block;
-  padding: 12px 28px;
-  border-radius: var(--radio);
-  font-size: 0.9rem;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  cursor: pointer;
-  border: 2px solid transparent;
-  transition: background-color var(--transicion), color var(--transicion), border-color var(--transicion), transform var(--transicion), box-shadow var(--transicion);
-  position: relative;
-  overflow: hidden;
-}
 
-.btn::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  background-color: rgba(255,255,255,0.3);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  transition: width 0.6s ease, height 0.6s ease;
-}
-
-.btn:active::after {
-  width: 300px;
-  height: 300px;
-}
-
-.btn:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--sombra);
-}
-
-.btn:active {
-  transform: translateY(-1px);
-}
-
-.btn-primario {
-  background-color: var(--color-acento);
-  color: var(--color-principal);
-  border-color: var(--color-acento);
-}
-
-.btn-primario:hover {
-  background-color: var(--color-acento-claro);
-  border-color: var(--color-acento-claro);
-}
-
-.btn-secundario {
-  background-color: transparent;
-  color: var(--color-acento);
-  border-color: var(--color-acento);
-}
-
-.btn-secundario:hover {
-  background-color: var(--color-acento);
-  color: var(--color-principal);
-}
-
-/* =============================================
-   CONTENEDORES
-   ============================================= */
-.contenedor {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-}
-
-section {
-  padding: 70px 20px;
-}
-
-.titulo-seccion {
-  font-family: var(--fuente-titulo);
-  font-size: 2.2rem;
-  color: var(--color-texto);
-  text-align: center;
-  margin-bottom: 10px;
-}
-
-.subtitulo-seccion {
-  text-align: center;
-  color: var(--color-gris);
-  margin-bottom: 40px;
-  font-size: 1rem;
-}
-
-.linea-dorada {
-  display: block;
-  width: 70px;
-  height: 3px;
-  background: linear-gradient(90deg, var(--color-acento), var(--color-acento-claro));
-  margin: 10px auto 35px;
-  border-radius: 2px;
-}
-
-/* =============================================
-   TARJETAS (GRID)
-   ============================================= */
+/* Tarjetas (grid) */
 .grid-tarjetas {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -498,7 +269,7 @@ section {
   background-color: var(--color-blanco);
   border-radius: var(--radio-lg);
   padding: 32px 26px;
-  box-shadow: var(--sombra-suave);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   text-align: center;
   border-top: 4px solid var(--color-acento);
   transition: transform var(--transicion), box-shadow var(--transicion);
@@ -520,7 +291,7 @@ section {
 
 .tarjeta:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: var(--sombra-fuerte);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .tarjeta-icono {
@@ -538,12 +309,12 @@ section {
   font-family: var(--fuente-titulo);
   font-size: 1.2rem;
   margin-bottom: 10px;
-  color: var(--color-principal);
+  color: var(--color-acento);
   transition: color var(--transicion);
 }
 
 .tarjeta:hover h3 {
-  color: var(--color-acento);
+  color: var(--color-acento-claro);
 }
 
 .tarjeta p {
@@ -569,15 +340,14 @@ section {
   margin-top: 10px;
 }
 
-/* =============================================
-   TABLAS
-   ============================================= */
+
+/* Tablas */
 .tabla-contenedor {
   max-width: 1000px;
   margin: 0 auto;
   overflow-x: auto;
   border-radius: var(--radio-lg);
-  box-shadow: var(--sombra);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 table {
@@ -620,7 +390,7 @@ thead:hover th::after {
 
 tbody tr {
   border-bottom: 1px solid #e8e8e8;
-  transition: background-color var(--transicion), transform var(--transicion);
+  transition: transform var(--transicion);
 }
 
 tbody tr:last-child {
@@ -632,19 +402,13 @@ tbody tr:nth-child(even) {
 }
 
 tbody tr:hover {
-  background-color: rgba(232, 184, 75, 0.08);
   transform: scale(1.01);
-  box-shadow: var(--sombra-suave);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 tbody td {
   padding: 14px 18px;
   color: #333;
-  transition: color var(--transicion);
-}
-
-tbody tr:hover td {
-  color: var(--color-principal);
 }
 
 .badge {
@@ -676,21 +440,20 @@ tbody tr:hover td {
   color: #856404;
 }
 
-/* =============================================
-   FORMULARIOS
-   ============================================= */
+
+/* Formularios */
 .form-contenedor {
   max-width: 680px;
   margin: 0 auto;
   background-color: var(--color-blanco);
   padding: 45px;
   border-radius: var(--radio-lg);
-  box-shadow: var(--sombra);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: box-shadow var(--transicion);
 }
 
 .form-contenedor:hover {
-  box-shadow: var(--sombra-fuerte);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
 .form-fila-doble {
@@ -703,11 +466,11 @@ tbody tr:hover td {
   margin-bottom: 22px;
 }
 
-.form-grupo label {
+.form-grupo > label {
   display: block;
   font-size: 0.85rem;
   font-weight: bold;
-  color: var(--color-principal);
+  color: var(--color-texto);
   margin-bottom: 6px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -719,14 +482,28 @@ tbody tr:hover td {
 .form-grupo textarea {
   width: 100%;
   padding: 14px 16px;
-  border: 2px solid #ddd;
+  border: 2px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radio);
   font-family: var(--fuente-cuerpo);
   font-size: 0.95rem;
-  color: var(--color-texto-oscuro);
-  background-color: #fdfdfd;
+  color: var(--color-texto);
+  background-color: var(--color-principal);
   transition: border-color var(--transicion), box-shadow var(--transicion), transform var(--transicion);
   outline: none;
+}
+
+/* Corrección para que controles de opción no hereden estilos de cajas de texto */
+.form-grupo input[type="checkbox"],
+.form-grupo input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  box-shadow: none !important;
+  transform: none !important;
+  cursor: pointer;
 }
 
 .form-grupo input:focus,
@@ -808,8 +585,9 @@ tbody tr:hover td {
   gap: 8px;
   cursor: pointer;
   padding: 8px 14px;
-  border: 2px solid #eee;
+  border: 2px solid rgba(255, 255, 255, 0.15);
   border-radius: var(--radio);
+  color: var(--color-texto);
   transition: border-color var(--transicion), background-color var(--transicion), transform var(--transicion);
 }
 
@@ -829,96 +607,8 @@ tbody tr:hover td {
   background-color: rgba(232, 184, 75, 0.1);
 }
 
-/* =============================================
-   SECCIÓN OSCURA
-   ============================================= */
-.seccion-oscura {
-  background-color: var(--color-principal);
-  color: var(--color-texto);
-}
 
-.seccion-oscura .titulo-seccion {
-  color: var(--color-acento);
-}
-
-.seccion-oscura .subtitulo-seccion {
-  color: #aaa;
-}
-
-/* =============================================
-   FOOTER
-   ============================================= */
-footer {
-  background: linear-gradient(135deg, var(--color-principal), #0d0d1a);
-  color: #aaa;
-  padding: 50px 20px 20px;
-  border-top: 3px solid var(--color-acento);
-}
-
-.footer-contenido {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 35px;
-  margin-bottom: 30px;
-}
-
-.footer-col h4 {
-  color: var(--color-acento);
-  font-family: var(--fuente-titulo);
-  margin-bottom: 16px;
-  font-size: 1.1rem;
-  position: relative;
-  padding-bottom: 10px;
-}
-
-.footer-col h4::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 40px;
-  height: 2px;
-  background-color: var(--color-acento);
-}
-
-.footer-col p,
-.footer-col a {
-  font-size: 0.85rem;
-  line-height: 1.9;
-  color: #aaa;
-  transition: color var(--transicion);
-}
-
-.footer-col a:hover {
-  color: var(--color-acento);
-  padding-left: 4px;
-}
-
-.footer-col ul {
-  list-style: none;
-}
-
-.footer-col ul li {
-  transition: transform var(--transicion);
-}
-
-.footer-col ul li:hover {
-  transform: translateX(4px);
-}
-
-.footer-bottom {
-  text-align: center;
-  font-size: 0.8rem;
-  color: #666;
-  border-top: 1px solid rgba(255,255,255,0.08);
-  padding-top: 22px;
-}
-
-/* =============================================
-   PÁGINA NOSOTROS
-   ============================================= */
+/* Página nosotros */
 .seccion-nosotros-intro {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -957,9 +647,8 @@ footer {
   font-weight: bold;
 }
 
-/* =============================================
-   BANNER CTA
-   ============================================= */
+
+/* Banner cta */
 .banner-cta {
   background: linear-gradient(135deg, var(--color-principal), var(--color-fondo-oscuro));
   color: var(--color-texto);
@@ -1012,9 +701,8 @@ footer {
   animation: fadeInUp 0.8s ease 0.4s both;
 }
 
-/* =============================================
-   PAGE HEADER (páginas internas)
-   ============================================= */
+
+/* Page header (páginas internas) */
 .page-header {
   background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 60%, var(--color-fondo-oscuro) 100%);
   padding: 60px 20px;
@@ -1048,9 +736,8 @@ footer {
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
-/* =============================================
-   DINAMIC LOADING (contenido cargado vía JS)
-   ============================================= */
+
+/* Dinamic loading (contenido cargado vía js) */
 .carga-spinner {
   text-align: center;
   padding: 40px;
@@ -1103,7 +790,7 @@ footer {
 .btn-filtro:hover {
   border-color: var(--color-acento);
   transform: translateY(-2px);
-  box-shadow: var(--sombra-suave);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .btn-filtro.activo {
@@ -1139,9 +826,8 @@ footer {
   color: #aaa;
 }
 
-/* =============================================
-   MODAL / NOTIFICACIONES
-   ============================================= */
+
+/* Modal / notificaciones */
 .notificacion {
   position: fixed;
   top: 90px;
@@ -1150,7 +836,7 @@ footer {
   border-radius: var(--radio);
   color: white;
   font-weight: bold;
-  box-shadow: var(--sombra-fuerte);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   z-index: 2000;
   animation: slideDown 0.4s ease, fadeOut 0.4s ease 2.6s forwards;
   max-width: 350px;
@@ -1175,9 +861,8 @@ footer {
   }
 }
 
-/* =============================================
-   MENSAJE ÉXITO FORMULARIO
-   ============================================= */
+
+/* Mensaje éxito formulario */
 .mensaje-exito {
   display: none;
   margin-top: 24px;
@@ -1191,9 +876,8 @@ footer {
   border-left: 4px solid var(--color-exito);
 }
 
-/* =============================================
-   CARRUSEL / GALERÍA DE IMÁGENES
-   ============================================= */
+
+/* Carrusel / galería de imágenes */
 .galeria {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
@@ -1234,427 +918,224 @@ footer {
   transform: translateY(0);
 }
 
-/* =============================================
-   UTILIDADES
-   ============================================= */
-.text-center { text-align: center; }
-.text-left { text-align: left; }
-.mt-20 { margin-top: 20px; }
-.mt-30 { margin-top: 30px; }
-.mb-0  { margin-bottom: 0; }
 
-/* =============================================
-   MEDIA QUERIES - RESPONSIVE
-   ============================================= */
+/* Modal dialogs (original) */
+/* Modal.css - modales, notificaciones y sidebar del carrito
+   overlay modal con animación, notificaciones toast, carrito lateral deslizante */
 
-/* Tablet (601px - 900px) */
-@media (max-width: 900px) {
-  .hero {
-    padding: 70px 20px;
-  }
+/* Overlay del modal */
+.modal-overlay {
+  position: fixed;    /* Cubre toda la pantalla independientemente del scroll */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.6); /* Fondo semitransparente oscuro */
+  z-index: 2000;     /* Por encima del header (z-index:1000) */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden; /* Oculto por defecto, se muestra con .activo */
+  transition: opacity 0.3s ease, visibility 0.3s ease; /* Transición suave al aparecer/desaparecer */
+  padding: 20px;      /* Padding lateral para que no quede pegado a los bordes en móvil */
+}
+.modal-overlay.activo { opacity: 1; visibility: visible; } /* Activa la visibilidad del modal */
 
-  .hero h1 {
-    font-size: 2.3rem;
-  }
+/* Caja del modal: centrada, con scroll interno si el contenido es muy largo */
+.modal-contenido {
+  background: var(--color-blanco);
+  border-radius: var(--radio-lg);
+  max-width: 600px;
+  width: 100%;
+  max-height: 80vh;      /* Altura máxima: 80% del viewport, con scroll si excede */
+  overflow-y: auto;      /* Scroll vertical interno para contenido largo */
+  padding: 32px;
+  position: relative;
+  transform: translateY(30px) scale(0.95); /* Estado inicial: desplazado hacia abajo y escalado */
+  transition: transform 0.3s ease;
+}
+.modal-overlay.activo .modal-contenido { transform: translateY(0) scale(1); } /* Animación de entrada: sube y escala a tamaño normal */
 
-  .hero p {
-    font-size: 1rem;
-  }
+/* Botón cerrar modal */
+.modal-cerrar {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  background: none;
+  border: none;
+  font-size: 1.6rem;
+  cursor: pointer;
+  color: var(--color-gris);
+  transition: color var(--transicion), transform var(--transicion);
+  line-height: 1;
+}
+.modal-cerrar:hover { color: var(--color-error); transform: rotate(90deg); } /* Se vuelve rojo y rota 90° al hover */
 
-  section {
-    padding: 50px 20px;
-  }
-
-  .titulo-seccion {
-    font-size: 1.8rem;
-  }
-
-  .grid-tarjetas {
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-  }
-
-  .form-contenedor {
-    padding: 30px;
-  }
-
-  .page-header h1 {
-    font-size: 2rem;
-  }
-
-  .seccion-nosotros-intro {
-    gap: 30px;
-  }
-
-  .banner-cta h2 {
-    font-size: 1.6rem;
-  }
-
-  .tarjeta {
-    padding: 24px 20px;
-  }
+.modal-titulo {
+  font-family: var(--fuente-titulo);
+  font-size: 1.4rem;
+  color: var(--color-acento);
+  margin-bottom: 16px;
+  padding-right: 30px; /* Espacio para que no se superponga con el botón cerrar */
 }
 
-/* Mobile (max 600px) */
+/* Notificaciones toast */
+.notificacion {
+  position: fixed;
+  top: 90px;           /* Debajo del header (70px) + margen */
+  right: 20px;
+  padding: 16px 24px;
+  border-radius: var(--radio);
+  color: white;
+  font-weight: bold;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  z-index: 3000;       /* Por encima de todo (modales incluidos) */
+  animation: slideDown 0.4s ease, fadeOut 0.4s ease 2.6s forwards; /* Entrada deslizando, luego se desvanece a los 2.6s (ver animaciones.css) */
+  max-width: 350px;
+}
+.notificacion.exito { background-color: var(--color-exito); }  /* Verde para éxito */
+.notificacion.error { background-color: var(--color-error); }   /* Rojo para error */
+.notificacion.info { background-color: var(--color-info); }     /* Azul para información */
+
+/* Sidebar del carrito */
+.carrito-sidebar {
+  position: fixed;
+  top: 0;
+  right: -400px;       /* Oculto inicialmente: fuera de la pantalla a la derecha */
+  width: 380px;
+  height: 100%;
+  background: var(--color-blanco);
+  z-index: 2001;       /* Por encima del overlay del modal */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transition: right 0.35s ease; /* Animación de deslizamiento */
+  display: flex;
+  flex-direction: column;
+}
+.carrito-sidebar.abierto { right: 0; } /* Clase .abierto activada por JS: lo desliza hacia adentro */
+
+.carrito-sidebar-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.carrito-sidebar-header h3 {
+  font-family: var(--fuente-titulo);
+  color: var(--color-principal);
+}
+.carrito-sidebar-header .btn-cerrar {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  cursor: pointer;
+  color: var(--color-gris);
+  transition: color var(--transicion);
+}
+.carrito-sidebar-header .btn-cerrar:hover { color: var(--color-error); }
+
+/* Lista de items del carrito: scroll vertical */
+.carrito-sidebar-items {
+  flex: 1;             /* Ocupa todo el espacio disponible entre header y footer */
+  overflow-y: auto;    /* Scroll si hay muchos items */
+  padding: 16px 24px;
+}
+
+.carrito-sidebar-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+.carrito-sidebar-item .cs-emoji { font-size: 1.6rem; }
+.carrito-sidebar-item .cs-info { flex: 1; }
+.carrito-sidebar-item .cs-info h4 { font-size: 0.9rem; color: var(--color-texto); }
+.carrito-sidebar-item .cs-info p { font-size: 0.8rem; color: var(--color-gris); }
+.carrito-sidebar-item .cs-precio { font-weight: bold; color: var(--color-acento); font-size: 0.95rem; }
+.carrito-sidebar-item .cs-eliminar {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  opacity: 0.3;        /* Botón de eliminar semi-transparente */
+  transition: opacity var(--transicion);
+}
+.carrito-sidebar-item .cs-eliminar:hover { opacity: 1; }
+
+.carrito-sidebar-footer {
+  padding: 20px 24px;
+  border-top: 2px solid #eee;
+}
+.carrito-sidebar-total {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 12px;
+}
+.carrito-sidebar-total span { color: var(--color-acento); font-size: 1.2rem; }
+.carrito-sidebar-footer .btn { width: 100%; } /* Botón de checkout ocupa todo el ancho */
+
+/* Mensaje de carrito vacío dentro del sidebar */
+.carrito-vacio-msg {
+  text-align: center;
+  padding: 40px 0;
+  color: var(--color-gris);
+}
+.carrito-vacio-msg .cv-icono { font-size: 3rem; margin-bottom: 12px; opacity: 0.3; }
+
+/* Imagen dentro del cuerpo del modal (ej. detalle de producto) */
+.modal-body img {
+  width: 100%;
+  border-radius: var(--radio);
+  margin-bottom: 16px;
+}
+
+/* Responsive */
 @media (max-width: 600px) {
-  .btn-menu {
-    display: flex;
-  }
-
-  #menuNav {
-    position: fixed;
-    top: 70px;
-    left: 0;
-    right: 0;
-    background-color: var(--color-principal);
-    padding: 20px;
-    box-shadow: var(--sombra-fuerte);
-    transform: translateY(-120%);
-    opacity: 0;
-    transition: transform 0.4s ease, opacity 0.4s ease;
-    z-index: 999;
-  }
-
-  #menuNav.visible {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  #menuNav ul {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  #menuNav ul li a {
-    display: block;
-    padding: 14px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-
-  #menuNav ul li a:hover {
-    padding-left: 20px;
-  }
-
-  .hero {
-    padding: 50px 20px;
-  }
-
-  .hero h1 {
-    font-size: 1.7rem;
-  }
-
-  .hero p {
-    font-size: 0.95rem;
-  }
-
-  .hero-botones {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .hero-botones .btn {
-    width: 100%;
-    max-width: 250px;
-    text-align: center;
-  }
-
-  section {
-    padding: 40px 20px;
-  }
-
-  .titulo-seccion {
-    font-size: 1.5rem;
-  }
-
-  .grid-tarjetas {
-    grid-template-columns: 1fr;
-    gap: 18px;
-  }
-
-  .form-fila-doble {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-
-  .form-contenedor {
-    padding: 22px;
-  }
-
-  .tarjeta {
-    padding: 22px 18px;
-  }
-
-  .page-header {
-    padding: 40px 20px;
-  }
-
-  .page-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .seccion-nosotros-intro {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  .nosotros-emoji {
-    font-size: 4rem;
-  }
-
-  .footer-contenido {
-    grid-template-columns: 1fr;
-    text-align: center;
-  }
-
-  .footer-col h4::after {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .footer-col ul li:hover {
-    transform: none;
-  }
-
-  .banner-cta {
-    padding: 40px 20px;
-  }
-
-  .banner-cta h2 {
-    font-size: 1.3rem;
-  }
-
-  .tabla-contenedor {
-    border-radius: var(--radio);
-  }
-
-  table {
-    font-size: 0.8rem;
-  }
-
-  thead th,
-  tbody td {
-    padding: 10px 12px;
-  }
-
-  .filtros-catalogo {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .notificacion {
-    left: 20px;
-    right: 20px;
-    max-width: none;
-  }
+  .carrito-sidebar { width: 100%; right: -100%; } /* Sidebar ocupa todo el ancho en móvil */
+  .modal-contenido { padding: 24px; }              /* Reduce padding del modal */
+  .notificacion { left: 20px; right: 20px; max-width: none; } /* Notificación ocupa todo el ancho disponible */
 }
 
-/* Small mobile (max 400px) */
-@media (max-width: 400px) {
-  .hero h1 {
-    font-size: 1.4rem;
-  }
 
-  .logo-nombre {
-    font-size: 1.1rem;
-  }
-
-  .logo-slogan {
-    display: none;
-  }
-
-  .titulo-seccion {
-    font-size: 1.3rem;
-  }
-
-  .page-header h1 {
-    font-size: 1.3rem;
-  }
-}
-
-/* High resolution (1401px+) */
-@media (min-width: 1401px) {
-  .header-contenido,
-  .contenedor,
-  .footer-contenido {
-    max-width: 1400px;
-  }
-
-  .hero {
-    padding: 130px 20px;
-  }
-
-  .hero h1 {
-    font-size: 3.8rem;
-  }
-
-  .hero p {
-    font-size: 1.3rem;
-    max-width: 600px;
-  }
-
-  section {
-    padding: 90px 20px;
-  }
-
-  .titulo-seccion {
-    font-size: 2.8rem;
-  }
-
-  .grid-tarjetas {
-    gap: 32px;
-  }
-
-  .tarjeta {
-    padding: 40px 32px;
-  }
-
-  .page-header {
-    padding: 80px 20px;
-  }
-
-  .page-header h1 {
-    font-size: 3.2rem;
-  }
-}
-
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --color-fondo-claro: #1a1a2e;
-    --color-blanco: #242444;
-    --color-texto-oscuro: #e0e0e0;
-    --color-gris: #999;
-  }
-
-  .tarjeta {
-    border-top-color: var(--color-acento);
-  }
-
-  .tarjeta p {
-    color: #aaa;
-  }
-
-  .lista-valores li {
-    border-bottom-color: #333;
-  }
-
-  .lista-valores li:hover {
-    color: var(--color-acento);
-  }
-
-  tbody tr:nth-child(even) {
-    background-color: #2a2a4a;
-  }
-
-  tbody td {
-    color: #ccc;
-  }
-
-  .form-contenedor {
-    background-color: #2a2a4a;
-  }
-
-  .form-grupo input,
-  .form-grupo select,
-  .form-grupo textarea {
-    background-color: #1a1a30;
-    color: #e0e0e0;
-    border-color: #444;
-  }
-
-  section[style*="background-color: #f8f5f0"] {
-    background-color: #1e1e38 !important;
-  }
-
-  .seccion-nosotros-intro p {
-    color: #bbb !important;
-  }
-}
-
-/* ============ MODO CLARO (Light Mode) ============ */
-body.light-mode {
-  background-color: #e3f2fd;
-  color: #111b30;
-}
-
-/* Cambiar la barra de navegación (Header) a Blanco */
-body.light-mode header {
-    background-color: #ffffff;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-}
-
-/* Cambiar los enlaces del menú a color azul marino oscuro para que se vean sobre el fondo blanco */
-body.light-mode #menuNav ul li a {
-    color: #1a1a2e;
-}
-body.light-mode #menuNav ul li a:hover,
-body.light-mode #menuNav ul li a.activo {
-    color: #e8b84b; /* Mantiene tu hermoso amarillo dorado activo */
-}
-
-/* Hacer que el botón de Modo Día/Noche se vea oscuro en el menú claro */
-body.light-mode #toggle-theme {
-    color: #1a1a2e;
-}
-body.light-mode #toggle-theme:hover {
-    color: #e8b84b;
-}
-
-/* ---------------------------------------------------
-   LOGICA DE TARJETAS BLANCAS EN SECCIONES OSCURAS
-   (Sección: ¿Por qué elegir RiveraSound? / Destacados)
-   --------------------------------------------------- */
-
-/* Forzar que las tarjetas (.tarjeta) se vuelvan BLANCAS en modo día */
-body.light-mode .tarjeta {
-    background-color: #ffffff !important;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
-}
-
-/* Forzar que los títulos de las tarjetas pasen a tu azul marino oscuro */
-body.light-mode .tarjeta h3 {
-    color: #1a1a2e !important;
-}
-
-/* Forzar que las descripciones de las tarjetas sean gris oscuro legible */
-body.light-mode .tarjeta p {
-    color: #444444 !important;
-}
-
-/* Mantener el precio en dorado resaltante */
-body.light-mode .tarjeta .precio {
-    color: #e8b84b !important;
-}
-
-/* Forzar que los títulos de secciones que tengan fondos claros por defecto sean oscuros */
-body.light-mode .titulo-seccion {
-    color: #1a1a2e;
-}
-
-/* Modificar las secciones que tenían gris claro (#f8f5f0) para que se adapten al modo día */
-body.light-mode section[style*="background-color: #f8f5f0"] {
-    background-color: #ffffff !important;
-}
-
-/* ============ CONTADOR ============ */
+/* Componentes específicos (contador, blog, carrito, cuenta, ofertas) */
+/* Contador */
 .contador-numero { font-size: 2.5rem !important; font-weight: bold; color: var(--color-acento); }
 
-/* ============ BLOG ============ */
-.blog-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 28px; }
-.blog-tarjeta { background-color: var(--color-blanco); border-radius: var(--radio-lg); overflow: hidden; box-shadow: var(--sombra-suave); cursor: pointer; transition: transform var(--transicion), box-shadow var(--transicion); }
-.blog-tarjeta:hover { transform: translateY(-6px); box-shadow: var(--sombra-fuerte); }
-.blog-tarjeta-img { height: 200px; display: flex; align-items: center; justify-content: center; font-size: 4rem; }
+/* Blog */
+#blogGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.blog-tarjeta {
+  width: 100%;
+  background-color: var(--color-blanco);
+  border-radius: var(--radio-lg);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: transform var(--transicion), box-shadow var(--transicion);
+}
+.blog-tarjeta:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
 .blog-tarjeta-body { padding: 24px; }
-.blog-tarjeta-body h3 { font-family: var(--fuente-titulo); color: var(--color-principal); margin-bottom: 8px; }
-.blog-tarjeta-body p { color: #666; font-size: 0.9rem; line-height: 1.7; }
+.blog-tarjeta-body h3 { font-family: var(--fuente-titulo); color: var(--color-acento); margin-bottom: 8px; }
+.blog-tarjeta-body p { color: #ccc; font-size: 0.95rem; line-height: 1.7; }
 .blog-tarjeta-body .blog-fecha { font-size: 0.75rem; color: var(--color-gris); margin-top: 12px; display: block; }
 
-/* ============ CARRITO (página) ============ */
+/* Carrito (página) */
 .carrito-vacio { text-align: center; padding: 60px 20px; }
-.carrito-item { display: flex; align-items: center; gap: 16px; background: var(--color-blanco); padding: 16px 20px; border-radius: var(--radio); box-shadow: var(--sombra-suave); margin-bottom: 12px; }
+.carrito-item { display: flex; align-items: center; gap: 16px; background: var(--color-blanco); padding: 16px 20px; border-radius: var(--radio); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); margin-bottom: 12px; }
 .carrito-item .item-emoji { font-size: 2rem; }
 .carrito-item .item-info { flex: 1; }
-.carrito-item .item-info h4 { font-size: 1rem; color: var(--color-principal); }
+.carrito-item .item-info h4 { font-size: 1rem; color: var(--color-texto); }
 .carrito-item .item-info p { font-size: 0.85rem; color: var(--color-gris); }
 .carrito-item .item-precio { font-weight: bold; color: var(--color-acento); font-size: 1.1rem; }
 .carrito-item .btn-eliminar { background: none; border: none; font-size: 1.3rem; cursor: pointer; opacity: 0.4; transition: opacity var(--transicion); }
@@ -1662,7 +1143,7 @@ body.light-mode section[style*="background-color: #f8f5f0"] {
 .carrito-total { text-align: right; padding: 20px; font-size: 1.2rem; font-weight: bold; border-top: 2px solid #eee; margin-top: 16px; }
 .carrito-total span { color: var(--color-acento); font-size: 1.4rem; }
 
-/* ============ CUENTA (Login/Registro con tabs) ============ */
+/* Cuenta (login/registro con tabs) */
 .cuenta-tab { cursor: pointer; }
 .cuenta-panel { display: none; }
 .cuenta-panel.activo { display: block; }
@@ -1670,19 +1151,19 @@ body.light-mode section[style*="background-color: #f8f5f0"] {
 .cuenta-enlace a { color: var(--color-acento); font-weight: bold; }
 .cuenta-enlace a:hover { text-decoration: underline; }
 
-/* ============ OFERTAS ============ */
+/* Ofertas */
 .ofertas-header { text-align: center; padding: 30px 20px; }
 .ofertas-header .descuento { display: inline-block; background: var(--color-error); color: white; padding: 6px 16px; border-radius: 20px; font-weight: bold; font-size: 0.85rem; margin-bottom: 16px; }
 .ofertas-header h2 { font-size: 2rem; margin-bottom: 8px; }
 .ofertas-header p { color: var(--color-gris); }
 
-/* ============ PÁGINA 404 ============ */
+/* Página 404 */
 .error-404 { text-align: center; padding: 80px 20px; }
 .error-404 .error-numero { font-size: 8rem; font-weight: bold; color: var(--color-acento); font-family: var(--fuente-titulo); line-height: 1; text-shadow: 2px 2px 0 var(--color-principal); }
 .error-404 h2 { font-size: 1.8rem; margin: 16px 0 8px; }
 .error-404 p { color: var(--color-gris); margin-bottom: 24px; }
 
-/* ============ BOTÓN FLOTANTE FEEDBACK ============ */
+/* Botón flotante feedback */
 .btn-feedback {
   position: fixed;
   bottom: 100px;
@@ -1696,7 +1177,7 @@ body.light-mode section[style*="background-color: #f8f5f0"] {
   border-radius: 30px;
   font-size: 0.85rem;
   font-weight: bold;
-  box-shadow: var(--sombra);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: transform var(--transicion), background-color var(--transicion);
   display: flex;
   align-items: center;
@@ -1716,12 +1197,3 @@ body.light-mode section[style*="background-color: #f8f5f0"] {
   }
 }
 
-/* ============ DARK MODE MEDIA QUERY OVERRIDES PARA LIGHT-MODE CLASS ============ */
-body.light-mode {
-  --color-fondo-claro: #e3f2fd;
-  --color-blanco: #ffffff;
-  --color-texto-oscuro: #111b30;
-  --color-gris: #888;
-  background-color: #e3f2fd;
-  color: #111b30;
-}

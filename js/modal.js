@@ -1,57 +1,79 @@
-/* ============================================ modal.js - Sistema de modales ============================================ */
+/* Sistema de Ventanas Flotantes (Modales) */
 
 var RiveraSound = RiveraSound || {};
 
-/**
- * RiveraSound.modal - Control de ventanas modales superpuestas (overlay).
- * Permite abrir modales con contenido HTML o elementos DOM, cerrarlos con
- * click fuera del modal o con la tecla Escape.
- */
+// Módulo encargado de gestionar las vistas de ventanas modales
 RiveraSound.modal = {
 
-  /** abrir - Muestra el overlay modal con el contenido especificado.
-   *  @param {string|HTMLElement} htmlContent - Contenido HTML (string) o elemento DOM a mostrar.
-   *  @param {string} [titulo] - Título opcional que se muestra en un <h3> dentro del modal.
+  /**
+   * abrir: Muestra el overlay modal y le inyecta el contenido indicado.
+   * @param {string|HTMLElement} htmlContent - Contenido HTML plano en string o elemento DOM.
+   * @param {string} titulo - Título opcional que aparecerá en la parte superior del modal.
    */
-  abrir: function (htmlContent, titulo) {
-    var overlay = document.getElementById('modalOverlay');
-    var content = document.getElementById('modalContent');
-    if (!overlay || !content) return;
+  abrir(htmlContent, titulo) {
+    const overlay = document.getElementById('modalOverlay');
+    const content = document.getElementById('modalContent');
+    if (!overlay || !content) return; // Evita errores de ejecución si no existen en el HTML
 
-    content.innerHTML = '';
+    content.innerHTML = ''; // Resetea el contenido interno anterior
+    
+    // Si se especificó un título, creamos un elemento <h3> y lo añadimos
     if (titulo) {
-      content.appendChild(RiveraSound.utils.crearElemento('h3', { className: 'modal-titulo', textContent: titulo }));
+      content.appendChild(RiveraSound.utils.crearElemento('h3', { 
+        className: 'modal-titulo', 
+        textContent: titulo 
+      }));
     }
+    
+    // Inyectamos el contenido según su formato (Texto HTML o Elemento del DOM)
     if (typeof htmlContent === 'string') {
-      content.insertAdjacentHTML('beforeend', htmlContent); // Inserta HTML string
+      content.insertAdjacentHTML('beforeend', htmlContent); // Inyección de string HTML
     } else if (htmlContent instanceof HTMLElement) {
-      content.appendChild(htmlContent);                     // Adjunta elemento DOM
+      content.appendChild(htmlContent); // Inyección directa de nodo del DOM
     }
-    overlay.classList.add('activo');
-    document.body.style.overflow = 'hidden'; // Previene scroll del body mientras el modal está abierto
+    
+    overlay.classList.add('activo'); // Muestra la ventana flotante agregando la clase activa
+    document.body.style.overflow = 'hidden'; // Bloquea el scroll del fondo para no perder la posición
   },
 
-  /** cerrar - Oculta el overlay modal y restaura el scroll del body. */
-  cerrar: function () {
-    var overlay = document.getElementById('modalOverlay');
+  /**
+   * cerrar: Oculta la ventana modal y restablece el scroll de la página.
+   */
+  cerrar() {
+    const overlay = document.getElementById('modalOverlay');
     if (!overlay) return;
-    overlay.classList.remove('activo');
-    document.body.style.overflow = '';
+    
+    overlay.classList.remove('activo'); // Oculta el modal removiendo la clase activa
+    document.body.style.overflow = '';   // Reactiva el scroll de la página principal
   },
 
-  /** init - Bindea eventos: click fuera del modal (en el overlay) lo cierra, y tecla Escape lo cierra. */
-  init: function () {
-    var overlay = document.getElementById('modalOverlay');
+  /**
+   * init: Bindea los eventos interactivos de cierre (clic fuera del modal y tecla Escape)
+   */
+  init() {
+    const overlay = document.getElementById('modalOverlay');
     if (!overlay) return;
 
-    /* --- Click en el overlay (fuera del contenido) cierra el modal --- */
-    overlay.addEventListener('click', function (e) {
-      if (e.target === overlay) RiveraSound.modal.cerrar();
+    // 1. Cerrar al hacer clic en el fondo gris (overlay) fuera del recuadro blanco de contenido
+    overlay.addEventListener('click', (e) => {
+      if (e.target === overlay) {
+        RiveraSound.modal.cerrar();
+      }
     });
 
-    /* --- Tecla Escape cierra el modal --- */
-    document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') RiveraSound.modal.cerrar();
+    // 2. Cerrar inmediatamente al presionar la tecla física 'Escape' del teclado
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        RiveraSound.modal.cerrar();
+      }
     });
+
+    // 3. Cerrar al hacer clic en el botón X de cierre
+    const btnCerrar = document.getElementById('modalCerrar');
+    if (btnCerrar) {
+      btnCerrar.addEventListener('click', () => {
+        RiveraSound.modal.cerrar();
+      });
+    }
   }
 };

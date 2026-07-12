@@ -1,18 +1,12 @@
-/* ============================================ router.js - Enrutador SPA, autenticación local y gestión de cuenta ============================================ */
+/* Enrutador SPA, Autenticación Local e Historial de Pedidos */
 
 var RiveraSound = RiveraSound || {};
 
-/**
- * RiveraSound.router - Enrutador de página única (SPA) basado en hash (#).
- * Escucha cambios en window.location.hash y carga fragmentos HTML parciales
- * dentro de <div id="app"> sin recargar la página.
- * También gestiona: login/registro local (localStorage), perfil de usuario,
- * historial de pedidos con cambio de estados, y formulario de contacto.
- */
+// Objeto enrutador de RiveraSound
 RiveraSound.router = {
 
-  /** routeMap - Asocia cada hash de URL a un nombre de ruta interno.
-   *  Ej: '#instrumentos' → 'instrumentos', '#cuenta-login' → 'cuenta-login'.
+  /**
+   * routeMap: Asocia los hashes de la barra de direcciones con nombres lógicos de ruta.
    */
   routeMap: {
     '': 'inicio', '#': 'inicio', '#inicio': 'inicio',
@@ -30,9 +24,9 @@ RiveraSound.router = {
     '#cuenta-pedidos': 'cuenta-pedidos'
   },
 
-  /** pageFiles - Asocia cada nombre de ruta al archivo HTML parcial que debe cargar.
-   *  'inicio' y '404' se renderizan inline (sin fetch) porque están definidos
-   *  directamente como strings HTML en renderInicio() y render404().
+  /**
+   * pageFiles: Mapea cada nombre de ruta con la ubicación física de su HTML parcial.
+   * 'inicio' y '404' no cargan archivos externos; se inyectan como plantillas de texto.
    */
   pageFiles: {
     'inicio': '',
@@ -50,59 +44,93 @@ RiveraSound.router = {
     'cuenta-pedidos': 'PaginasHTML/Cuenta/cuenta.html'
   },
 
-  /** currentRoute - Almacena la ruta actual para evitar recargar la misma vista. */
+  // Almacena la ruta que se encuentra visible actualmente
   currentRoute: null,
 
-  /** init - Punto de entrada: bindea los eventos de navegación y resuelve la ruta inicial. */
-  init: function () {
+  /**
+   * init: Punto de arranque del enrutador. Asigna eventos de clics e inicia la resolución.
+   */
+  init() {
     this.bindEvents();
     this.resolve();
+    this.initNewsletterForm();
   },
 
-  /** bindEvents - Escucha cambios en el hash de la URL (hashchange) y
-   *  captura clicks en enlaces <a href="#..."> para navegación SPA sin recarga.
+  initNewsletterForm() {
+    RiveraSound.validaciones.initFormulario('formNewsletter');
+    const formNews = document.getElementById('formNewsletter');
+    if (formNews && !formNews.hasAttribute('data-handler')) {
+      formNews.setAttribute('data-handler', '1');
+      formNews.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const emailInput = document.getElementById('newsletterCorreo');
+        if (RiveraSound.validaciones.validarCampo(emailInput)) {
+          RiveraSound.utils.notificar('¡Te has suscrito con éxito al boletín!', 'exito');
+          formNews.reset();
+          const grupo = emailInput.closest('.form-grupo');
+          if (grupo) grupo.classList.remove('success');
+        } else {
+          RiveraSound.utils.notificar('Por favor, ingresa un correo válido.', 'error');
+        }
+      });
+    }
+  },
+
+  /**
+   * bindEvents: Configura la detección de cambios en la barra de direcciones (hashchange)
+   * e intercepta todos los enlaces que inician con '#' para evitar la recarga clásica del navegador.
    */
-  bindEvents: function () {
-    var self = this;
-    window.addEventListener('hashchange', function () { self.resolve(); });
-    document.addEventListener('click', function (e) {
-      var link = e.target.closest('a[href^="#"]');
+  bindEvents() {
+    window.addEventListener('hashchange', () => { this.resolve(); });
+    
+    document.addEventListener('click', (e) => {
+      const link = e.target.closest('a[href^="#"]');
       if (!link) return;
-      e.preventDefault();
-      var filtro = link.getAttribute('data-filtro');
+      
+      e.preventDefault(); // Detiene el comportamiento de recarga del navegador
+      
+      // Capturamos filtros opcionales del catálogo si el enlace los provee
+      const filtro = link.getAttribute('data-filtro');
       if (filtro) {
-        self._filtroActivo = filtro;
+        this._filtroActivo = filtro;
       }
+      
+      // Cambiamos el hash de la dirección para disparar el evento hashchange
       window.location.hash = link.getAttribute('href').slice(1);
     });
   },
 
-  /** resolve - Lee el hash actual de la URL y decide qué ruta cargar.
-   *  Si la ruta es la misma que la actual (excepto carrito), no recarga.
-   *  Actualiza el atributo data-page del body para personalización CSS por página.
+  /**
+   * resolve: Lee la URL física y decide qué contenido inyectar.
+   * Evita re-solicitar archivos si la ruta destino es la misma que la actual (excepto el carrito).
    */
-  resolve: function () {
-    var hash = window.location.hash || '#';
-    var route = this.routeMap[hash] || '404';
+  resolve() {
+    const hash = window.location.hash || '#';
+    const route = this.routeMap[hash] || '404';
+    
+    // Evitamos re-solicitar el archivo si es el mismo, excepto para carrito para forzar refresco
     if (route === this.currentRoute && route !== 'carrito') return;
     this.currentRoute = route;
+    
+    // Cambiamos un atributo data-page en el body para aplicar diseños CSS modularizados por sección
     document.body.setAttribute('data-page', route.replace(/^cuenta-.*$/, 'cuenta'));
+    
     this.loadRoute(route, hash);
   },
 
-  /** loadRoute - Carga el contenido de la ruta en <div id="app">.
-   *  Si es 'inicio' o '404', usa HTML inline. Para el resto, hace fetch()
-   *  del archivo HTML parcial y lo inyecta. Muestra un spinner durante la carga.
-   *  @param {string} route - Nombre de la ruta interna.
-   *  @param {string} hash - Hash de URL original (para tabs de cuenta).
+  /**
+   * loadRoute: Inserta el HTML en el contenedor central `<div id="app">`.
+   * Si es 'inicio' o '404' renderiza plantillas dinámicas en memoria. Si no,
+   * utiliza la API moderna `fetch` para descargar el fragmento HTML e inyectarlo.
    */
-  loadRoute: function (route, hash) {
-    var app = document.getElementById('app');
+  loadRoute(route, hash) {
+    const app = document.getElementById('app');
     if (!app) return;
 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    this.updateNav(route);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Desplazamiento automático al inicio de pantalla
+    this.updateNav(route); // Actualiza la apariencia visual del menú activo
 
+    // 1. Carga de vistas en memoria rápida
     if (route === 'inicio') {
       app.innerHTML = this.renderInicio();
       this.afterRender(route);
@@ -115,58 +143,56 @@ RiveraSound.router = {
       return;
     }
 
-    var file = this.pageFiles[route];
+    // 2. Carga de fragmentos HTML por red (Fetch)
+    const file = this.pageFiles[route];
     if (!file) {
       app.innerHTML = this.render404();
       this.afterRender(route);
       return;
     }
 
-    var self = this;
+    // Mostramos un spinner animado de CSS mientras se descarga la plantilla
     app.innerHTML = '<div class="carga-spinner"></div>';
 
     fetch(file)
-      .then(function (r) {
-        if (!r.ok) throw new Error('Not found');
+      .then((r) => {
+        if (!r.ok) throw new Error('Fragmento HTML no encontrado');
         return r.text();
       })
-      .then(function (html) {
-        app.innerHTML = html;
-        self.postProcess(route, hash);
-        self.afterRender(route);
+      .then((html) => {
+        app.innerHTML = html; // Inyecta el contenido HTML parcial
+        this.postProcess(route, hash); // Ejecuta configuraciones previas a la interacción
+        this.afterRender(route); // Dispara la inicialización de interactividad
       })
-      .catch(function () {
-        app.innerHTML = self.render404();
-        self.afterRender(route);
+      .catch(() => {
+        app.innerHTML = this.render404();
+        this.afterRender(route);
       });
   },
 
-  /** postProcess - Ejecuta lógica adicional después de inyectar el HTML parcial.
-   *  @param {string} route - Ruta cargada.
-   *  @param {string} hash - Hash de URL original.
+  /**
+   * postProcess: Lógica previa a la renderización interactiva (ej: inicializar pestañas de cuenta).
    */
-  postProcess: function (route, hash) {
-    if (route === 'cuenta' || route === 'cuenta-login' || route === 'cuenta-registro' ||
-        route === 'cuenta-perfil' || route === 'cuenta-pedidos') {
+  postProcess(route, hash) {
+    if (['cuenta', 'cuenta-login', 'cuenta-registro', 'cuenta-perfil', 'cuenta-pedidos'].indexOf(route) !== -1) {
       this.initCuentaTabs(hash);
     }
   },
 
-  /** afterRender - Inicializa módulos y bindea eventos después de cargar una vista.
-   *  Reactiva: scroll reveal, contadores, catálogo, sidebar del carrito.
-   *  Para contacto: inicializa validación y el formulario de envío local.
-   *  @param {string} route - Ruta cargada.
+  /**
+   * afterRender: Asigna lógica interactiva o scripts tras inyectar la vista en la pantalla.
    */
-  afterRender: function (route) {
+  afterRender(route) {
+    // Intentamos activar los Intersection Observers de scroll reveal y contadores numéricos
+    try { RiveraSound.catalogo.iniciar(); } catch (_) {}
     try { RiveraSound.reveal.iniciar(); } catch (_) {}
     try { RiveraSound.contadores.iniciar(); } catch (_) {}
-    try { RiveraSound.catalogo.iniciar(); } catch (_) {}
     try { RiveraSound.carrito.renderSidebar(); } catch (_) {}
 
     if (route === 'instrumentos' || route === 'catalogo') {
       if (this._filtroActivo) {
         RiveraSound.catalogo.renderCatalogo(this._filtroActivo, '');
-        this._filtroActivo = null;
+        this._filtroActivo = null; // Limpiamos el filtro temporal
       }
     }
 
@@ -174,50 +200,93 @@ RiveraSound.router = {
       RiveraSound.carrito.renderPagina();
     }
 
+    // Configuración específica de la página de contacto y formulario
     if (route === 'contacto') {
+      // Inicializamos validaciones automáticas al escribir
       RiveraSound.validaciones.initFormulario('formularioContacto');
-      var formContacto = document.getElementById('formularioContacto');
+      
+      const formContacto = document.getElementById('formularioContacto');
       if (formContacto && !formContacto.hasAttribute('data-handler')) {
         formContacto.setAttribute('data-handler', '1');
-        formContacto.addEventListener('submit', function (e) {
+        formContacto.addEventListener('submit', (e) => {
           e.preventDefault();
+          
+          // Comprobamos la validación de cada campo antes de enviar
+          let esValido = true;
+          formContacto.querySelectorAll('input, select, textarea').forEach((input) => {
+            if (!RiveraSound.validaciones.validarCampo(input)) esValido = false;
+          });
+          
+          if (!esValido) {
+            RiveraSound.utils.notificar('Por favor, ingresa los datos correctamente', 'error');
+            return;
+          }
+          
           document.getElementById('mensajeExito').style.display = 'block';
           formContacto.reset();
           RiveraSound.utils.notificar('Mensaje enviado con éxito', 'exito');
         });
       }
+
+      RiveraSound.validaciones.initFormulario('formularioImportacion');
+      const formImport = document.getElementById('formularioImportacion');
+      if (formImport && !formImport.hasAttribute('data-handler')) {
+        formImport.setAttribute('data-handler', '1');
+        formImport.addEventListener('submit', (e) => {
+          e.preventDefault();
+          let esValido = true;
+          formImport.querySelectorAll('input, textarea').forEach((input) => {
+            if (!RiveraSound.validaciones.validarCampo(input)) esValido = false;
+          });
+          
+          if (!esValido) {
+            RiveraSound.utils.notificar('Por favor, ingresa los datos correctamente', 'error');
+            return;
+          }
+          
+          document.getElementById('importExito').style.display = 'block';
+          formImport.reset();
+          formImport.querySelectorAll('.form-grupo').forEach((g) => g.classList.remove('success', 'error'));
+          RiveraSound.utils.notificar('Solicitud de importación registrada', 'exito');
+        });
+      }
+
+      // Creamos dinámicamente el botón flotante de "Feedback" si no está presente
       if (!document.getElementById('btnFeedback')) {
-        var feedbackBtn = document.createElement('button');
+        const feedbackBtn = document.createElement('button');
         feedbackBtn.id = 'btnFeedback';
         feedbackBtn.className = 'btn-feedback';
         feedbackBtn.title = 'Dejar feedback';
         feedbackBtn.innerHTML = '&#128172; Feedback';
-        feedbackBtn.addEventListener('click', function () {
-          var feedbackHtml =
-            '<div style="text-align:center;">' +
-            '<div style="font-size:3rem;margin-bottom:12px;">&#128172;</div>' +
-            '<p style="color:var(--color-gris);margin-bottom:16px;">Ayúdanos a mejorar. Déjanos tu opinión:</p>' +
-            '<form id="formFeedback" onsubmit="return false;">' +
-            '<div class="form-grupo">' +
-            '<label for="feedbackNombre">Nombre</label>' +
-            '<input type="text" id="feedbackNombre" placeholder="Tu nombre" required>' +
-            '</div>' +
-            '<div class="form-grupo">' +
-            '<label for="feedbackMensaje">Comentario</label>' +
-            '<textarea id="feedbackMensaje" rows="4" placeholder="Escribe tu feedback aquí..." required></textarea>' +
-            '</div>' +
-            '<button type="submit" class="btn btn-primario" id="btnEnviarFeedback">Enviar feedback</button>' +
-            '</form>' +
-            '</div>';
+        
+        feedbackBtn.addEventListener('click', () => {
+          const feedbackHtml = `
+            <div style="text-align:center;">
+              <div style="font-size:3rem;margin-bottom:12px;">💬</div>
+              <p style="color:var(--color-gris);margin-bottom:16px;">Ayúdanos a mejorar. Déjanos tu opinión:</p>
+              <form id="formFeedback" onsubmit="return false;">
+                <div class="form-grupo">
+                  <label for="feedbackNombre">Nombre</label>
+                  <input type="text" id="feedbackNombre" placeholder="Tu nombre" required>
+                </div>
+                <div class="form-grupo">
+                  <label for="feedbackMensaje">Comentario</label>
+                  <textarea id="feedbackMensaje" rows="4" placeholder="Escribe tu feedback aquí..." required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primario" id="btnEnviarFeedback" style="width:100%;">Enviar feedback</button>
+              </form>
+            </div>
+          `;
           RiveraSound.modal.abrir(feedbackHtml, 'Feedback');
-          setTimeout(function () {
-            var formFb = document.getElementById('formFeedback');
+          
+          setTimeout(() => {
+            const formFb = document.getElementById('formFeedback');
             if (formFb) {
-              formFb.addEventListener('submit', function (ev) {
+              formFb.addEventListener('submit', (ev) => {
                 ev.preventDefault();
-                var fbMsg = document.getElementById('feedbackMensaje');
+                const fbMsg = document.getElementById('feedbackMensaje');
                 if (fbMsg && fbMsg.value.trim().length >= 3) {
-                  RiveraSound.utils.notificar('Gracias por tu feedback!', 'exito');
+                  RiveraSound.utils.notificar('¡Gracias por tu feedback!', 'exito');
                   RiveraSound.modal.cerrar();
                 } else {
                   RiveraSound.utils.notificar('Escribe un comentario de al menos 3 caracteres.', 'error');
@@ -231,11 +300,11 @@ RiveraSound.router = {
     }
   },
 
-  /** updateNav - Resalta el enlace activo en el menú de navegación según la ruta actual.
-   *  @param {string} route - Ruta activa.
+  /**
+   * updateNav: Pone la clase .activo en el menú superior según la sección visitada.
    */
-  updateNav: function (route) {
-    var map = {
+  updateNav(route) {
+    const map = {
       inicio: 'inicio', instrumentos: 'instrumentos', catalogo: 'catalogo',
       ofertas: 'ofertas', nosotros: 'nosotros', contacto: 'contacto',
       blog: 'blog', carrito: 'carrito', cuenta: 'cuenta',
@@ -243,326 +312,541 @@ RiveraSound.router = {
       'cuenta-perfil': 'cuenta', 'cuenta-pedidos': 'cuenta',
       '404': 'inicio'
     };
-    var active = map[route] || 'inicio';
-    document.querySelectorAll('#menuNav a').forEach(function (a) {
+    const active = map[route] || 'inicio';
+    document.querySelectorAll('#menuNav a').forEach((a) => {
       a.classList.remove('activo');
-      if (a.getAttribute('href') === '#' + active) a.classList.add('activo');
+      if (a.getAttribute('href') === `#${active}`) {
+        a.classList.add('activo');
+      }
     });
   },
 
-  /* ============ CUENTA TABS (Login, Registro, Perfil, Pedidos) ============ */
+  /* Pestañas de cuenta (login, registro, perfil, pedidos) */
 
-  /** initCuentaTabs - Inicializa la lógica de las pestañas de la sección Cuenta.
-   *  Gestiona: login local (contra localStorage + demo hardcodeado),
-   *  registro local, perfil del usuario y renderizado de pedidos.
-   *  Muestra/oculta tabs según si hay sesión activa.
-   *  @param {string} hash - Hash de URL para determinar el tab inicial.
+  /**
+   * initCuentaTabs: Inicializa las pestañas lógicas de la cuenta, controlando
+   * el inicio de sesión y registro de forma local con localStorage.
    */
-  initCuentaTabs: function (hash) {
+  initCuentaTabs(hash) {
     try {
-    RiveraSound.validaciones.initFormulario('formLogin');
-    RiveraSound.validaciones.initFormulario('formRegistro');
-    var tabs = document.querySelectorAll('.cuenta-tab');
-    var panels = document.querySelectorAll('.cuenta-panel');
+      RiveraSound.validaciones.initFormulario('formLogin');
+      RiveraSound.validaciones.initFormulario('formRegistro');
+      
+      const tabs = document.querySelectorAll('.cuenta-tab');
+      const panels = document.querySelectorAll('.cuenta-panel');
 
-    var activar = function (tabId) {
-      tabs.forEach(function (t) { t.classList.remove('activo'); });
-      panels.forEach(function (p) { p.classList.remove('activo'); });
-      var tab = document.querySelector('.cuenta-tab[data-tab="' + tabId + '"]');
-      var panel = document.getElementById('cuentaPanel' + tabId);
-      if (tab) tab.classList.add('activo');
-      if (panel) panel.classList.add('activo');
-    };
+      // Función local para mostrar el panel activo y pintar su pestaña correspondiente
+      const activar = (tabId) => {
+        tabs.forEach((t) => t.classList.remove('activo'));
+        panels.forEach((p) => p.classList.remove('activo'));
+        
+        const tab = document.querySelector(`.cuenta-tab[data-tab="${tabId}"]`);
+        const panel = document.getElementById(`cuentaPanel${tabId.charAt(0).toUpperCase() + tabId.slice(1)}`);
+        
+        if (tab) tab.classList.add('activo');
+        if (panel) panel.classList.add('activo');
+      };
 
-    tabs.forEach(function (tab) {
-      tab.addEventListener('click', function () {
-        var t = this.getAttribute('data-tab');
-        window.location.hash = 'cuenta-' + t;
+      tabs.forEach((tab) => {
+        tab.addEventListener('click', function () {
+          const t = this.getAttribute('data-tab');
+          window.location.hash = `cuenta-${t}`; // Modifica URL para gatillar enrutador
+        });
       });
-    });
 
-    var haySesion = !!localStorage.getItem('riverasound_usuario');
-    var tabsSesion = document.querySelectorAll('.cuenta-tab-sesion');
-    var tabsPublicas = document.querySelectorAll('.cuenta-tab:not(.cuenta-tab-sesion)');
-    tabsSesion.forEach(function (t) { t.style.display = haySesion ? '' : 'none'; });
-    tabsPublicas.forEach(function (t) { t.style.display = haySesion ? 'none' : ''; });
+      // Validamos si hay sesión activa leyendo el valor en localStorage
+      const haySesion = !!localStorage.getItem('riverasound_usuario');
+      const tabsSesion = document.querySelectorAll('.cuenta-tab-sesion');
+      const tabsPublicas = document.querySelectorAll('.cuenta-tab:not(.cuenta-tab-sesion)');
+      
+      // Ocultamos pestañas de autenticación si ya hay sesión y viceversa
+      tabsSesion.forEach((t) => { t.style.display = haySesion ? '' : 'none'; });
+      tabsPublicas.forEach((t) => { t.style.display = haySesion ? 'none' : ''; });
 
-    var tabMap = {
-      'cuenta': 'login',
-      'cuenta-login': 'login',
-      'cuenta-registro': 'registro',
-      'cuenta-perfil': 'perfil',
-      'cuenta-pedidos': 'pedidos'
-    };
-    var hashClean = hash.replace(/^#/, '');
-    var defaultTab = tabMap[hashClean] || (haySesion ? 'perfil' : 'login');
-    activar(defaultTab);
+      const tabMap = {
+        'cuenta': 'login',
+        'cuenta-login': 'login',
+        'cuenta-registro': 'registro',
+        'cuenta-perfil': 'perfil',
+        'cuenta-pedidos': 'pedidos'
+      };
+      
+      const hashClean = hash.replace(/^#/, '');
+      const defaultTab = tabMap[hashClean] || (haySesion ? 'perfil' : 'login');
+      activar(defaultTab);
 
-    /* --- FORMULARIO DE LOGIN (local) --- */
-    var formLogin = document.getElementById('formLogin');
-    if (formLogin) {
-      formLogin.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var correo = document.getElementById('loginCorreo').value;
-        var password = document.getElementById('loginPassword').value;
-        var btn = formLogin.querySelector('button[type="submit"]');
-        btn.textContent = 'Ingresando...';
-        btn.disabled = true;
+      /* --- INICIO DE SESIÓN LOCAL --- */
+      const formLogin = document.getElementById('formLogin');
+      if (formLogin) {
+        formLogin.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const correoInput = document.getElementById('loginCorreo');
+          const passwordInput = document.getElementById('loginPassword');
+          const btn = formLogin.querySelector('button[type="submit"]');
+          
+          btn.textContent = 'Ingresando...';
+          btn.disabled = true;
 
-        var usuarios = [];
-        try { usuarios = JSON.parse(localStorage.getItem('riverasound_usuarios')) || []; } catch (_) {}
+          // VALIDACIÓN DE SEGURIDAD (Submit validation)
+          let esValido = true;
+          if (!RiveraSound.validaciones.validarCampo(correoInput)) esValido = false;
+          if (!RiveraSound.validaciones.validarCampo(passwordInput)) esValido = false;
 
-        var usuarioValido = null;
-        if (correo === 'demo@riverasound.pe' && password === 'demo123') {
-          usuarioValido = { nombre: 'Usuario', apellido: 'Demo', correo: 'demo@riverasound.pe' };
-        } else {
-          usuarios.forEach(function (u) {
-            if (u.correo === correo && u.password === password) {
-              usuarioValido = { nombre: u.nombre, apellido: u.apellido, correo: u.correo };
-            }
-          });
-        }
-
-        btn.textContent = 'Iniciar sesión';
-        btn.disabled = false;
-
-        if (usuarioValido) {
-          localStorage.setItem('riverasound_usuario', JSON.stringify(usuarioValido));
-          RiveraSound.utils.notificar('Bienvenido ' + usuarioValido.nombre + '!', 'exito');
-          document.querySelectorAll('.cuenta-tab-sesion').forEach(function (t) { t.style.display = ''; });
-          document.querySelectorAll('.cuenta-tab:not(.cuenta-tab-sesion)').forEach(function (t) { t.style.display = 'none'; });
-          document.querySelectorAll('.cuenta-panel').forEach(function (p) { p.classList.remove('activo'); });
-          var perfilPanel = document.getElementById('cuentaPanelPerfil');
-          if (perfilPanel) {
-            perfilPanel.classList.add('activo');
-            var perfilHeader = perfilPanel.querySelector('h3');
-            var perfilEmail = perfilPanel.querySelector('p');
-            if (perfilHeader) perfilHeader.textContent = usuarioValido.nombre + ' ' + (usuarioValido.apellido || '');
-            if (perfilEmail) perfilEmail.textContent = usuarioValido.correo;
+          if (!esValido) {
+            btn.textContent = 'Iniciar sesión';
+            btn.disabled = false;
+            RiveraSound.utils.notificar('Por favor, ingresa tus datos correctamente', 'error');
+            return;
           }
-          window.location.hash = 'cuenta-perfil';
-        } else {
-          RiveraSound.utils.notificar('Credenciales inválidas. Usa demo@riverasound.pe / demo123', 'error');
-        }
-      });
-    }
 
-    /* --- FORMULARIO DE REGISTRO (local) --- */
-    var formRegistro = document.getElementById('formRegistro');
-    if (formRegistro) {
-      formRegistro.addEventListener('submit', function (e) {
-        e.preventDefault();
-        var btn = formRegistro.querySelector('button[type="submit"]');
-        btn.textContent = 'Registrando...';
-        btn.disabled = true;
-        var nombre = document.getElementById('regNombre').value;
-        var apellido = document.getElementById('regApellido').value;
-        var correo = document.getElementById('regCorreo').value;
-        var password = document.getElementById('regPassword').value;
+          // NORMALIZACIÓN DE CORREOS (Case-insensitivity)
+          const correo = correoInput.value.trim().toLowerCase();
+          const password = passwordInput.value;
 
-        var usuarios = [];
-        try { usuarios = JSON.parse(localStorage.getItem('riverasound_usuarios')) || []; } catch (_) {}
+          let usuarios = [];
+          try { usuarios = JSON.parse(localStorage.getItem('riverasound_usuarios')) || []; } catch (_) {}
 
-        var existe = false;
-        usuarios.forEach(function (u) { if (u.correo === correo) existe = true; });
+          let usuarioValido = null;
+          
+          // Verificamos si corresponde a la cuenta Demo académica o a un usuario registrado
+          if (correo === 'demo@riverasound.pe' && password === 'demo123') {
+            usuarioValido = {
+              nombre: 'Usuario',
+              apellido: 'Demo',
+              correo: 'demo@riverasound.pe',
+              telefono: '',
+              direccion: '',
+              ciudad: ''
+            };
+            usuarios.forEach((u) => {
+              if (u.correo.toLowerCase() === 'demo@riverasound.pe') {
+                usuarioValido.telefono = u.telefono || '';
+                usuarioValido.direccion = u.direccion || '';
+                usuarioValido.ciudad = u.ciudad || '';
+              }
+            });
+          } else {
+            usuarios.forEach((u) => {
+              if (u.correo.trim().toLowerCase() === correo && u.password === password) {
+                usuarioValido = {
+                  nombre: u.nombre,
+                  apellido: u.apellido,
+                  correo: u.correo.trim().toLowerCase(),
+                  telefono: u.telefono || '',
+                  direccion: u.direccion || '',
+                  ciudad: u.ciudad || ''
+                };
+              }
+            });
+          }
 
-        if (existe) {
+          btn.textContent = 'Iniciar sesión';
+          btn.disabled = false;
+
+          if (usuarioValido) {
+            localStorage.setItem('riverasound_usuario', JSON.stringify(usuarioValido));
+            RiveraSound.utils.notificar(`¡Bienvenido ${usuarioValido.nombre}!`, 'exito');
+            
+            // Re-organiza visibilidad de pestañas
+            document.querySelectorAll('.cuenta-tab-sesion').forEach((t) => { t.style.display = ''; });
+            document.querySelectorAll('.cuenta-tab:not(.cuenta-tab-sesion)').forEach((t) => { t.style.display = 'none'; });
+            document.querySelectorAll('.cuenta-panel').forEach((p) => p.classList.remove('activo'));
+            
+            const perfilPanel = document.getElementById('cuentaPanelPerfil');
+            if (perfilPanel) {
+              perfilPanel.classList.add('activo');
+              const perfilHeader = perfilPanel.querySelector('h3');
+              const perfilEmail = perfilPanel.querySelector('p');
+              if (perfilHeader) perfilHeader.textContent = `${usuarioValido.nombre} ${usuarioValido.apellido || ''}`;
+              if (perfilEmail) perfilEmail.textContent = usuarioValido.correo;
+            }
+            window.location.hash = 'cuenta-perfil';
+          } else {
+            RiveraSound.utils.notificar('Credenciales inválidas. Usa demo@riverasound.pe / demo123', 'error');
+          }
+        });
+      }
+
+      /* --- REGISTRO DE USUARIOS LOCAL --- */
+      const formRegistro = document.getElementById('formRegistro');
+      if (formRegistro) {
+        formRegistro.addEventListener('submit', (e) => {
+          e.preventDefault();
+          const btn = formRegistro.querySelector('button[type="submit"]');
+          btn.textContent = 'Registrando...';
+          btn.disabled = true;
+
+          const nombreInput = document.getElementById('regNombre');
+          const apellidoInput = document.getElementById('regApellido');
+          const correoInput = document.getElementById('regCorreo');
+          const passwordInput = document.getElementById('regPassword');
+
+          // VALIDACIÓN DE SEGURIDAD
+          let esValido = true;
+          if (!RiveraSound.validaciones.validarCampo(nombreInput)) esValido = false;
+          if (!RiveraSound.validaciones.validarCampo(apellidoInput)) esValido = false;
+          if (!RiveraSound.validaciones.validarCampo(correoInput)) esValido = false;
+          if (!RiveraSound.validaciones.validarCampo(passwordInput)) esValido = false;
+
+          if (!esValido) {
+            btn.textContent = 'Crear cuenta';
+            btn.disabled = false;
+            RiveraSound.utils.notificar('Por favor, corrige los errores en el formulario', 'error');
+            return;
+          }
+
+          // NORMALIZACIÓN
+          const nombre = nombreInput.value.trim();
+          const apellido = apellidoInput.value.trim();
+          const correo = correoInput.value.trim().toLowerCase();
+          const password = passwordInput.value;
+
+          let usuarios = [];
+          try { usuarios = JSON.parse(localStorage.getItem('riverasound_usuarios')) || []; } catch (_) {}
+
+          let existe = false;
+          usuarios.forEach((u) => {
+            if (u.correo.trim().toLowerCase() === correo) existe = true;
+          });
+
+          if (existe) {
+            btn.textContent = 'Crear cuenta';
+            btn.disabled = false;
+            RiveraSound.utils.notificar('El correo ya está registrado. Inicia sesión.', 'error');
+            return;
+          }
+
+          // Guardamos el nuevo usuario en el array de localStorage
+          usuarios.push({ nombre, apellido, correo, password });
+          localStorage.setItem('riverasound_usuarios', JSON.stringify(usuarios));
+
           btn.textContent = 'Crear cuenta';
           btn.disabled = false;
-          RiveraSound.utils.notificar('El correo ya está registrado. Inicia sesión.', 'error');
-          return;
-        }
-
-        usuarios.push({ nombre: nombre, apellido: apellido, correo: correo, password: password });
-        localStorage.setItem('riverasound_usuarios', JSON.stringify(usuarios));
-
-        btn.textContent = 'Crear cuenta';
-        btn.disabled = false;
-        RiveraSound.utils.notificar('Registro exitoso. Inicia sesión!', 'exito');
-        window.location.hash = 'cuenta-login';
-      });
-    }
-
-    /* --- CARGAR PERFIL --- */
-    var usuarioGuardado = localStorage.getItem('riverasound_usuario');
-    var btnCerrar = document.getElementById('btnCerrarSesion');
-    if (usuarioGuardado) {
-      var userData = JSON.parse(usuarioGuardado);
-      var perfilHeader = document.querySelector('#cuentaPanelPerfil h3');
-      var perfilEmail = document.querySelector('#cuentaPanelPerfil p');
-      if (perfilHeader) perfilHeader.textContent = userData.nombre + ' ' + (userData.apellido || '');
-      if (perfilEmail) perfilEmail.textContent = userData.correo;
-      if (btnCerrar) btnCerrar.style.display = 'block';
-    }
-    if (btnCerrar) {
-      btnCerrar.addEventListener('click', function () {
-        localStorage.removeItem('riverasound_usuario');
-        RiveraSound.utils.notificar('Sesión cerrada', 'info');
-        document.querySelectorAll('.cuenta-tab-sesion').forEach(function (t) { t.style.display = 'none'; });
-        document.querySelectorAll('.cuenta-tab:not(.cuenta-tab-sesion)').forEach(function (t) { t.style.display = ''; });
-        window.location.hash = 'cuenta-login';
-      });
-    }
-
-    /* --- PEDIDOS: renderizar historial --- */
-    if (hashClean === 'cuenta-pedidos' || hashClean === 'pedidos') {
-      this.renderPedidos();
-    }
-    var hashListener = function () {
-      if (window.location.hash === '#cuenta-pedidos') {
-        RiveraSound.router.renderPedidos();
+          RiveraSound.utils.notificar('Registro exitoso. ¡Inicia sesión!', 'exito');
+          
+          window.location.hash = 'cuenta-login'; // Redirecciona al login
+        });
       }
-    };
-    window.removeEventListener('hashchange', hashListener);
-    window.addEventListener('hashchange', hashListener);
 
-    } catch (_) {}
+      /* --- CARGAR DATOS DE SESIÓN EN PERFIL --- */
+      const usuarioGuardado = localStorage.getItem('riverasound_usuario');
+      const btnCerrar = document.getElementById('btnCerrarSesion');
+      
+      if (usuarioGuardado) {
+        const userData = JSON.parse(usuarioGuardado);
+        const perfilHeader = document.querySelector('#cuentaPanelPerfil h3');
+        const perfilEmail = document.querySelector('#cuentaPanelPerfil p');
+        if (perfilHeader) perfilHeader.textContent = `${userData.nombre} ${userData.apellido || ''}`;
+        if (perfilEmail) perfilEmail.textContent = userData.correo;
+        if (btnCerrar) btnCerrar.style.display = 'block';
+
+        const tInput = document.getElementById('perfilTelefono');
+        const dInput = document.getElementById('perfilDireccion');
+        const cInput = document.getElementById('perfilCiudad');
+        if (tInput) tInput.value = userData.telefono || '';
+        if (dInput) dInput.value = userData.direccion || '';
+        if (cInput) cInput.value = userData.ciudad || '';
+      }
+
+      RiveraSound.validaciones.initFormulario('formPerfilDatos');
+      const formPerfil = document.getElementById('formPerfilDatos');
+      if (formPerfil && !formPerfil.hasAttribute('data-handler')) {
+        formPerfil.setAttribute('data-handler', '1');
+        formPerfil.addEventListener('submit', (e) => {
+          e.preventDefault();
+          let esValido = true;
+          formPerfil.querySelectorAll('input').forEach((input) => {
+            if (!RiveraSound.validaciones.validarCampo(input)) esValido = false;
+          });
+
+          if (!esValido) {
+            RiveraSound.utils.notificar('Por favor, ingresa los datos correctamente', 'error');
+            return;
+          }
+
+          const usuario = JSON.parse(localStorage.getItem('riverasound_usuario'));
+          if (usuario) {
+            usuario.telefono = document.getElementById('perfilTelefono').value.trim();
+            usuario.direccion = document.getElementById('perfilDireccion').value.trim();
+            usuario.ciudad = document.getElementById('perfilCiudad').value.trim();
+            localStorage.setItem('riverasound_usuario', JSON.stringify(usuario));
+
+            let usuarios = [];
+            try { usuarios = JSON.parse(localStorage.getItem('riverasound_usuarios')) || []; } catch (_) {}
+            let encontrado = false;
+            usuarios = usuarios.map((u) => {
+              if (u.correo.toLowerCase() === usuario.correo.toLowerCase()) {
+                u.telefono = usuario.telefono;
+                u.direccion = usuario.direccion;
+                u.ciudad = usuario.ciudad;
+                encontrado = true;
+              }
+              return u;
+            });
+            if (!encontrado) {
+              usuarios.push({
+                nombre: usuario.nombre,
+                apellido: usuario.apellido,
+                correo: usuario.correo.toLowerCase(),
+                password: usuario.correo.toLowerCase() === 'demo@riverasound.pe' ? 'demo123' : '',
+                telefono: usuario.telefono,
+                direccion: usuario.direccion,
+                ciudad: usuario.ciudad
+              });
+            }
+            localStorage.setItem('riverasound_usuarios', JSON.stringify(usuarios));
+
+            formPerfil.querySelectorAll('.form-grupo').forEach((g) => g.classList.remove('success'));
+            RiveraSound.utils.notificar('Datos de envío guardados', 'exito');
+          }
+        });
+      }
+
+      if (btnCerrar) {
+        btnCerrar.addEventListener('click', () => {
+          localStorage.removeItem('riverasound_usuario');
+          RiveraSound.utils.notificar('Sesión cerrada con éxito', 'info');
+          
+          // Oculta/Muestra pestañas según cierre de sesión
+          document.querySelectorAll('.cuenta-tab-sesion').forEach((t) => { t.style.display = 'none'; });
+          document.querySelectorAll('.cuenta-tab:not(.cuenta-tab-sesion)').forEach((t) => { t.style.display = ''; });
+          
+          window.location.hash = 'cuenta-login';
+        });
+      }
+
+      // Renderiza los pedidos históricos si el usuario está en ese panel
+      if (hashClean === 'cuenta-pedidos' || hashClean === 'pedidos') {
+        this.renderPedidos();
+      }
+
+      // PREVENCIÓN DE FUGA DE MEMORIA: Enlazamos con una referencia única estática
+      if (!RiveraSound.router._hashListener) {
+        RiveraSound.router._hashListener = () => {
+          if (window.location.hash === '#cuenta-pedidos') {
+            RiveraSound.router.renderPedidos();
+          }
+        };
+      }
+      window.removeEventListener('hashchange', RiveraSound.router._hashListener);
+      window.addEventListener('hashchange', RiveraSound.router._hashListener);
+
+    } catch (e) {
+      // Manejo silencioso de excepciones en la vista
+    }
   },
 
-  /* ============ HISTORIAL DE PEDIDOS (renderizado en el tab de pedidos) ============ */
+  /* Historial de pedidos */
 
-  /** renderPedidos - Renderiza el historial de pedidos del usuario logueado.
-   *  Filtra pedidos por correo del usuario actual y muestra cada pedido
-   *  con un <select> para cambiar su estado (Pendiente, En envío, etc.).
-   *  Los cambios de estado se guardan inmediatamente en localStorage.
+  /**
+   * renderPedidos: Obtiene los pedidos creados por el usuario activo
+   * y los dibuja en forma de lista detallada, permitiendo cambiar su estado.
    */
-  renderPedidos: function () {
-    var pedidos = RiveraSound.carrito.obtenerPedidos();
-    var usuario = localStorage.getItem('riverasound_usuario');
+  renderPedidos() {
+    const pedidos = RiveraSound.carrito.obtenerPedidos();
+    const usuario = localStorage.getItem('riverasound_usuario');
     if (!usuario) return;
-    var correo = JSON.parse(usuario).correo;
-    var pedidosUsuario = pedidos.filter(function (p) { return p.usuario === correo; });
-    var panel = document.getElementById('cuentaPanelPedidos');
+    
+    const correo = JSON.parse(usuario).correo;
+    // Filtramos solo los pedidos del usuario logueado en sesión activa
+    const pedidosUsuario = pedidos.filter((p) => p.usuario.trim().toLowerCase() === correo.trim().toLowerCase());
+    
+    const panel = document.getElementById('cuentaPanelPedidos');
     if (!panel) return;
 
     if (pedidosUsuario.length === 0) {
-      panel.innerHTML = '\
-        <div style="text-align:center;padding:40px 0;">\
-          <div style="font-size:3rem;opacity:0.3;margin-bottom:12px;">&#128230;</div>\
-          <h3 style="color:var(--color-principal);">No tienes pedidos aún</h3>\
-          <p style="color:var(--color-gris);">Los pedidos que realices aparecerán aquí.</p>\
-          <a href="#instrumentos" class="btn btn-primario" style="margin-top:12px;">Explorar catálogo</a>\
-        </div>';
+      panel.innerHTML = `
+        <div style="text-align:center;padding:40px 0;">
+          <div style="font-size:3rem;opacity:0.3;margin-bottom:12px;">📦</div>
+          <h3 style="color:var(--color-primario);">No tienes pedidos registrados</h3>
+          <p style="color:var(--color-gris);">Los pedidos que realices aparecerán aquí.</p>
+          <a href="#instrumentos" class="btn btn-primario" style="margin-top:12px;">Explorar catálogo</a>
+        </div>
+      `;
       return;
     }
 
-    var estados = ['Pendiente', 'En envío', 'Entregado', 'Recogido en tienda', 'Cancelado'];
-    var html = '<div style="max-width:700px;margin:0 auto;">';
-    pedidosUsuario.forEach(function (p) {
-      var itemsHtml = '';
-      p.items.forEach(function (item) {
-        itemsHtml += '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;font-size:0.85rem;">\
-          <span>' + item.emoji + ' ' + item.nombre + ' x' + item.cantidad + '</span>\
-          <span>' + RiveraSound.utils.formatearPrecio(item.precio * item.cantidad) + '</span>\
-        </div>';
+    const estados = ['Pendiente', 'En envío', 'Entregado', 'Recogido en tienda', 'Cancelado'];
+    let html = '<div style="max-width:700px;margin:0 auto;">';
+
+    pedidosUsuario.forEach((p) => {
+      let itemsHtml = '';
+      p.items.forEach((item) => {
+        itemsHtml += `
+          <div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;font-size:0.85rem;">
+            <span>${item.emoji} ${item.nombre} x${item.cantidad}</span>
+            <span>${RiveraSound.utils.formatearPrecio(item.precio * item.cantidad)}</span>
+          </div>
+        `;
       });
-      var opcionesEstado = '';
-      estados.forEach(function (est) {
-        var sel = est === p.estado ? 'selected' : '';
-        opcionesEstado += '<option value="' + est + '" ' + sel + '>' + est + '</option>';
+
+      let opcionesEstado = '';
+      estados.forEach((est) => {
+        const seleccionado = est === p.estado ? 'selected' : '';
+        opcionesEstado += `<option value="${est}" ${seleccionado}>${est}</option>`;
       });
-      html += '\
-        <div style="background:var(--color-blanco);border-radius:var(--radio);box-shadow:var(--sombra-suave);padding:20px;margin-bottom:16px;">\
-          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">\
-            <div>\
-              <strong style="font-size:1rem;">#' + p.id + '</strong>\
-              <span style="color:var(--color-gris);font-size:0.8rem;margin-left:10px;">' + p.fecha + '</span>\
-            </div>\
-            <div style="display:flex;align-items:center;gap:8px;">\
-              <select class="estado-pedido-select" data-pedido="' + p.id + '" style="padding:4px 8px;border-radius:4px;border:1px solid #ccc;font-size:0.8rem;">' + opcionesEstado + '</select>\
-            </div>\
-          </div>\
-          ' + itemsHtml + '\
-          <div style="text-align:right;margin-top:10px;font-weight:bold;font-size:1.1rem;">Total: ' + RiveraSound.utils.formatearPrecio(p.total) + '</div>\
-        </div>';
+
+      html += `
+        <div style="background:var(--color-blanco);border-radius:var(--radio);box-shadow:0 2px 4px rgba(0, 0, 0, 0.1);padding:20px;margin-bottom:16px;border:1px solid #eee;">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:10px;">
+            <div>
+              <strong style="font-size:1rem;">#${p.id}</strong>
+              <span style="color:var(--color-gris);font-size:0.8rem;margin-left:10px;">${p.fecha}</span>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <select class="estado-pedido-select" data-pedido="${p.id}" style="padding:4px 8px;border-radius:4px;border:1px solid #ccc;font-size:0.8rem;">
+                ${opcionesEstado}
+              </select>
+            </div>
+          </div>
+          ${itemsHtml}
+          <div style="text-align:right;margin-top:10px;font-weight:bold;font-size:1.1rem;">Total: ${RiveraSound.utils.formatearPrecio(p.total)}</div>
+        </div>
+      `;
     });
+
     html += '</div>';
     panel.innerHTML = html;
 
-    panel.querySelectorAll('.estado-pedido-select').forEach(function (sel) {
+    // Asignamos controladores al select de estado de pedidos (Admin simulator local)
+    panel.querySelectorAll('.estado-pedido-select').forEach((sel) => {
       sel.addEventListener('change', function () {
-        var pedidoId = this.getAttribute('data-pedido');
-        var nuevoEstado = this.value;
+        const pedidoId = this.getAttribute('data-pedido');
+        const nuevoEstado = this.value;
         RiveraSound.carrito.actualizarEstadoPedido(pedidoId, nuevoEstado);
-        RiveraSound.utils.notificar('Pedido actualizado a: ' + nuevoEstado, 'exito');
+        RiveraSound.utils.notificar(`Pedido actualizado a: ${nuevoEstado}`, 'exito');
       });
     });
   },
 
-  /* ============ RENDER INLINE (páginas sin fetch) ============ */
+  /* Plantillas html de vistas en memoria */
 
-  /** renderInicio - Genera el HTML de la página de inicio como string.
-   *  Incluye hero, secciones con tarjetas, llamadas a la acción (CTA) y categorías.
-   *  Se inyecta directamente en <div id="app"> sin fetch.
-   *  @returns {string} - HTML completo de la página de inicio.
+  /**
+   * renderInicio: Genera el string HTML de la página de inicio (Landing page).
+   * @returns {string} - HTML.
    */
-  renderInicio: function () {
-    return '\
-<section class="hero">\
-  <div class="hero-contenido">\
-    <h1>Descubre tu instrumento perfecto</h1>\
-    <p>En RiveraSound encontraras los mejores instrumentos musicales importados, con garantia de calidad y la asesoria que necesitas para comenzar tu viaje musical.</p>\
-    <div class="hero-botones">\
-      <a href="#instrumentos" class="btn btn-primario">Ver Catalogo</a>\
-      <a href="#contacto" class="btn btn-secundario">Contactanos</a>\
-    </div>\
-  </div>\
-</section>\
-<section style="background-color: #f8f5f0;">\
-  <div class="contenedor">\
-    <h2 class="titulo-seccion reveal">?Por que elegir RiveraSound?</h2>\
-    <span class="linea-dorada reveal"></span>\
-    <p class="subtitulo-seccion reveal">Importaciones Rivera lleva mas de 15 anos trayendo musica de calidad al Peru</p>\
-    <div class="grid-tarjetas">\
-      <div class="tarjeta reveal"><div class="tarjeta-icono">&#127758;</div><h3>Importacion Directa</h3><p>Traemos instrumentos directamente desde Europa, Asia y America del Norte.</p></div>\
-      <div class="tarjeta reveal"><div class="tarjeta-icono">&#10004;&#65039;</div><h3>Garantia Oficial</h3><p>Todos nuestros instrumentos cuentan con garantia del fabricante y soporte tecnico.</p></div>\
-      <div class="tarjeta reveal"><div class="tarjeta-icono">&#127891;</div><h3>Asesoria Gratuita</h3><p>Musicos profesionales te ayudaran a encontrar el instrumento ideal.</p></div>\
-      <div class="tarjeta reveal"><div class="tarjeta-icono">&#128666;</div><h3>Envio a Todo el Peru</h3><p>Envios seguros y asegurados a Lima y todas las regiones del pais.</p></div>\
-    </div>\
-  </div>\
-</section>\
-<section>\
-  <div class="contenedor">\
-    <h2 class="titulo-seccion reveal">Instrumentos Destacados</h2>\
-    <span class="linea-dorada reveal"></span>\
-    <p class="subtitulo-seccion reveal">Nuestros productos mas populares</p>\
-    <div class="grid-tarjetas" id="destacadosGrid"></div>\
-    <div class="text-center mt-20 reveal"><a href="#instrumentos" class="btn btn-primario">Ver catalogo completo</a></div>\
-  </div>\
-</section>\
-<div class="banner-cta">\
-  <h2>?Buscas un instrumento especifico?</h2>\
-  <p>Podemos importarlo por pedido especial. !Consultanos!</p>\
-  <a href="#contacto" class="btn btn-secundario">Hacer un pedido especial</a>\
-</div>\
-<section style="background-color: #f8f5f0;">\
-  <div class="contenedor">\
-    <h2 class="titulo-seccion reveal">Nuestras Categorias</h2>\
-    <span class="linea-dorada reveal"></span>\
-    <div class="grid-tarjetas">\
-      <div class="tarjeta reveal"><div class="tarjeta-icono">&#127930;</div><h3>Viento</h3><p>Saxofones, trompetas, flautas, clarinetes.</p><br><a href="#instrumentos" class="btn btn-secundario">Ver mas</a></div>\
-      <div class="tarjeta reveal"><div class="tarjeta-icono">&#127927;</div><h3>Teclado</h3><p>Pianos digitales, MIDI, organos, sintetizadores.</p><br><a href="#instrumentos" class="btn btn-secundario">Ver mas</a></div>\
-      <div class="tarjeta reveal"><div class="tarjeta-icono">&#127943;</div><h3>Cuerda</h3><p>Guitarras, violines, cellos, bajos, ukeleles.</p><br><a href="#instrumentos" class="btn btn-secundario">Ver mas</a></div>\
-      <div class="tarjeta reveal"><div class="tarjeta-icono">&#129341;</div><h3>Percusion</h3><p>Baterias, cajones, congas, timbales.</p><br><a href="#instrumentos" class="btn btn-secundario">Ver mas</a></div>\
-    </div>\
-  </div>\
-</section>';
+  renderInicio() {
+    return `
+      <section class="hero">
+        <div class="hero-contenido">
+          <h1>Descubre tu instrumento perfecto</h1>
+          <p>En RiveraSound encontrarás los mejores instrumentos musicales importados, con garantía de calidad y la asesoría que necesitas para comenzar tu viaje musical.</p>
+          <div class="hero-botones">
+            <a href="#instrumentos" class="btn btn-primario">Ver Catálogo</a>
+            <a href="#contacto" class="btn btn-secundario">Contáctanos</a>
+          </div>
+        </div>
+      </section>
+      
+      <section style="background-color: var(--color-fondo);">
+        <div class="contenedor">
+          <h2 class="titulo-seccion reveal">¿Por qué elegir RiveraSound?</h2>
+          <span class="linea-dorada reveal"></span>
+          <p class="subtitulo-seccion reveal">Importaciones Rivera lleva más de 15 años trayendo música de calidad al Perú</p>
+          
+          <div class="grid-tarjetas">
+            <div class="tarjeta reveal">
+              <div class="tarjeta-icono">🌍</div>
+              <h3>Importación Directa</h3>
+              <p>Traemos instrumentos directamente desde Europa, Asia y América del Norte.</p>
+            </div>
+            <div class="tarjeta reveal">
+              <div class="tarjeta-icono">✔️</div>
+              <h3>Garantía Oficial</h3>
+              <p>Todos nuestros instrumentos cuentan con garantía oficial y soporte técnico especializado.</p>
+            </div>
+            <div class="tarjeta reveal">
+              <div class="tarjeta-icono">🎓</div>
+              <h3>Asesoría Gratuita</h3>
+              <p>Músicos profesionales te ayudarán en el proceso de encontrar tu instrumento ideal.</p>
+            </div>
+            <div class="tarjeta reveal">
+              <div class="tarjeta-icono">🚚</div>
+              <h3>Envío a Todo el Perú</h3>
+              <p>Envíos totalmente seguros y asegurados a Lima Metropolitana y regiones.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      <section>
+        <div class="contenedor">
+          <h2 class="titulo-seccion reveal">Instrumentos Destacados</h2>
+          <span class="linea-dorada reveal"></span>
+          <p class="subtitulo-seccion reveal">Nuestros productos más populares y solicitados</p>
+          
+          <div class="grid-tarjetas" id="destacadosGrid"></div>
+          
+          <div class="text-center mt-20 reveal" style="margin-top: 30px;">
+            <a href="#instrumentos" class="btn btn-primario">Ver catálogo completo</a>
+          </div>
+        </div>
+      </section>
+      
+      <div class="banner-cta">
+        <div class="contenedor">
+          <h2>¿Buscas un instrumento específico?</h2>
+          <p>Podemos importarlo bajo pedido especial desde distribuidores autorizados. ¡Consúltanos!</p>
+          <a href="#contacto" class="btn btn-secundario">Hacer un pedido especial</a>
+        </div>
+      </div>
+      
+      <section style="background-color: var(--color-fondo);">
+        <div class="contenedor">
+          <h2 class="titulo-seccion reveal">Nuestras Categorías</h2>
+          <span class="linea-dorada reveal"></span>
+          
+          <div class="grid-tarjetas">
+            <div class="tarjeta reveal">
+              <div class="tarjeta-icono">📯</div>
+              <h3>Viento</h3>
+              <p>Saxofones, trompetas, flautas traversas y clarinetes.</p>
+              <br>
+              <a href="#instrumentos" class="btn btn-secundario">Ver más</a>
+            </div>
+            <div class="tarjeta reveal">
+              <div class="tarjeta-icono">🎹</div>
+              <h3>Teclado</h3>
+              <p>Pianos digitales, controladores MIDI, sintetizadores.</p>
+              <br>
+              <a href="#instrumentos" class="btn btn-secundario">Ver más</a>
+            </div>
+            <div class="tarjeta reveal">
+              <div class="tarjeta-icono">🎸</div>
+              <h3>Cuerda</h3>
+              <p>Guitarras, violines, violonchelos, bajos, ukeleles.</p>
+              <br>
+              <a href="#instrumentos" class="btn btn-secundario">Ver más</a>
+            </div>
+            <div class="tarjeta reveal">
+              <div class="tarjeta-icono">🥁</div>
+              <h3>Percusión</h3>
+              <p>Baterías, cajones peruanos, congas y bongós.</p>
+              <br>
+              <a href="#instrumentos" class="btn btn-secundario">Ver más</a>
+            </div>
+          </div>
+        </div>
+      </section>
+    `;
   },
 
-  /** render404 - Genera el HTML de la página de error 404 (ruta no encontrada).
-   *  @returns {string} - HTML del mensaje 404 con botón para volver al inicio.
+  /**
+   * render404: Genera el string HTML para rutas inexistentes.
+   * @returns {string} - HTML.
    */
-  render404: function () {
-    return '\
-<section>\
-  <div class="contenedor">\
-    <div class="error-404">\
-      <div class="error-numero">404</div>\
-      <h2>Pagina no encontrada</h2>\
-      <p>La pagina que buscas no existe o ha sido movida.</p>\
-      <a href="#inicio" class="btn btn-primario">Volver al inicio</a>\
-    </div>\
-  </div>\
-</section>';
+  render404() {
+    return `
+      <section>
+        <div class="contenedor">
+          <div class="error-404">
+            <div class="error-numero">404</div>
+            <h2>Página no encontrada</h2>
+            <p>La dirección que estás buscando no existe o ha sido movida permanentemente.</p>
+            <a href="#inicio" class="btn btn-primario" style="margin-top:20px;">Volver al inicio</a>
+          </div>
+        </div>
+      </section>
+    `;
   }
 };
