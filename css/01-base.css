@@ -1,0 +1,45 @@
+/* Estilos Base y Configuración Global del Sitio */
+
+/* Reset y variables originales */
+:root {
+  --color-principal: #25253b;
+  --color-secundario: #202a45;
+  --color-acento: #e8b84b;
+  --color-acento-claro: #f0d48a;
+  --color-texto: #f0f0f0;
+  --color-texto-oscuro: #e0e0e0;
+  --color-fondo-claro: #202a45;
+  --color-fondo-oscuro: #0f3460;
+  --color-gris: #999;
+  --color-blanco: #2f2f4e;
+  --color-error: #dc3545;
+  --color-exito: #28a745;
+  --color-info: #17a2b8;
+  --fuente-titulo: 'Georgia', 'Times New Roman', serif;
+  --fuente-cuerpo: 'Trebuchet MS', 'Verdana', sans-serif;
+  --sombra: 0 4px 15px rgba(0,0,0,0.15);
+  --sombra-fuerte: 0 8px 30px rgba(0,0,0,0.2);
+  --sombra-suave: 0 2px 8px rgba(0,0,0,0.08);
+  --radio: 8px;
+  --radio-lg: 12px;
+  --transicion: 0.3s ease;
+  --transicion-larga: 0.5s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--fuente-cuerpo);
+  background-color: var(--color-principal);
+  color: var(--color-texto);
+  line-height: 1.6;
+  overflow-x: hidden;
+}

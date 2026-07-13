@@ -1,12 +1,160 @@
-/* ============================================
-   animaciones.css - Keyframes y estilos de animación
-   Animaciones reutilizables (fadeIn, float, shimmer, etc.) y
-   estados hover de componentes (tarjetas, botones, galería, etc.)
-   ============================================ */
+/* Animaciones Keyframes y Efectos Dinámicos */
 
-/* ============ KEYFRAMES (Animaciones globales) ============ */
+/* Keyframe animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-/* --- Aparece desde abajo (30px) --- */
+@keyframes fadeInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+@keyframes rotateIn {
+  from {
+    opacity: 0;
+    transform: rotate(-180deg) scale(0.3);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0) scale(1);
+  }
+}
+
+@keyframes bounceIn {
+  0% { transform: scale(0); opacity: 0; }
+  50% { transform: scale(1.15); }
+  70% { transform: scale(0.95); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heroNote {
+  0%, 100% {
+    opacity: 0.05;
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  50% {
+    opacity: 0.08;
+    transform: translate(-50%, -50%) rotate(10deg) scale(1.1);
+  }
+}
+
+
+/* Scroll reveal classes */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+  border-radius: var(--radio);
+  transition: transform var(--transicion), box-shadow var(--transicion);
+}
+
+img:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+::selection {
+  background-color: var(--color-acento);
+  color: var(--color-principal);
+}
+
+
+/* Animaciones adicionales (original) */
+/* Animaciones.css - keyframes y estilos de animación
+   animaciones reutilizables (fadein, float, shimmer, etc.) y
+   estados hover de componentes (tarjetas, botones, galería, etc.) */
+
+/* Keyframes (animaciones globales) */
+
+/* Aparece desde abajo (30px) */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translateY(30px); }
   to { opacity: 1; transform: translateY(0); }
@@ -16,17 +164,17 @@
   from { opacity: 0; transform: translateX(-30px); }
   to { opacity: 1; transform: translateX(0); }
 }
-/* --- Aparece desde la derecha (30px) --- */
+/* Aparece desde la derecha (30px) */
 @keyframes fadeInRight {
   from { opacity: 0; transform: translateX(30px); }
   to { opacity: 1; transform: translateX(0); }
 }
-/* --- Pulso suave (crece y vuelve) --- */
+/* Pulso suave (crece y vuelve) */
 @keyframes pulse {
   0%, 100% { transform: scale(1); }
   50% { transform: scale(1.05); }
 }
-/* --- Flotación vertical (sube y baja 10px) --- */
+/* Flotación vertical (sube y baja 10px) */
 @keyframes float {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-10px); }
@@ -36,28 +184,28 @@
   0% { background-position: -200% center; }
   100% { background-position: 200% center; }
 }
-/* --- Rebote de entrada (escala de 0 a 1 con overshoot) --- */
+/* Rebote de entrada (escala de 0 a 1 con overshoot) */
 @keyframes bounceIn {
   0% { transform: scale(0); opacity: 0; }
   50% { transform: scale(1.15); }
   70% { transform: scale(0.95); }
   100% { transform: scale(1); opacity: 1; }
 }
-/* --- Deslizamiento hacia abajo (para notificaciones y mensajes de error) --- */
+/* Deslizamiento hacia abajo (para notificaciones y mensajes de error) */
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-20px); }
   to { opacity: 1; transform: translateY(0); }
 }
-/* --- Desvanecimiento hacia la derecha (para notificaciones al desaparecer) --- */
+/* Desvanecimiento hacia la derecha (para notificaciones al desaparecer) */
 @keyframes fadeOut {
   to { opacity: 0; transform: translateX(50px); }
 }
-/* --- Rotación continua (para spinners) --- */
+/* Rotación continua (para spinners) */
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
 
-/* ============ CLASES REVEAL (Intersección con Scroll) ============ */
+/* Clases reveal (intersección con scroll) */
 /* Estas clases se usan con Intersection Observer de JS.
    Los elementos comienzan ocultos y se revelan cuando entran al viewport. */
 
@@ -82,31 +230,31 @@
 }
 .reveal-right.visible { opacity: 1; transform: translateX(0); }
 
-/* ============ TARJETAS (Hover Interactions) ============ */
+/* Tarjetas (hover interactions) */
 .tarjeta {
   transition: transform var(--transicion), box-shadow var(--transicion);
 }
 .tarjeta:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: var(--sombra-fuerte);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 .tarjeta:hover .tarjeta-icono { animation: bounceIn 0.6s ease; }
-.tarjeta:hover h3 { color: var(--card-hover-color, var(--color-acento)); }
+.tarjeta:hover h3 { color: var(--card-hover-color, var(--color-acento-claro)); }
 .tarjeta:hover .precio { transform: scale(1.1); }
 .tarjeta:hover img { transform: scale(1.05); }               /* El precio se agranda */
 
-/* ============ BADGES ============ */
+/* Badges */
 .badge { transition: transform var(--transicion), box-shadow var(--transicion); }
 .badge:hover { transform: scale(1.1); box-shadow: 0 2px 8px rgba(0,0,0,0.15); }
 
-/* ============ BOTONES ============ */
+/* Botones */
 .btn {
   transition: background-color var(--transicion), color var(--transicion), border-color var(--transicion), transform var(--transicion), box-shadow var(--transicion);
 }
-.btn:hover { transform: translateY(-3px); box-shadow: var(--sombra); }
+.btn:hover { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
 .btn:active { transform: translateY(-1px); }
 
-/* ============ FORMULARIOS (Focus) ============ */
+/* Formularios (focus) */
 .form-grupo input,
 .form-grupo select,
 .form-grupo textarea {
@@ -118,25 +266,25 @@
   transform: translateY(-1px); /* Se eleva ligeramente al enfocar */
 }
 
-/* ============ BLOG ============ */
+/* Blog */
 .blog-tarjeta { transition: transform var(--transicion), box-shadow var(--transicion); }
-.blog-tarjeta:hover { transform: translateY(-6px); box-shadow: var(--sombra-fuerte); }
+.blog-tarjeta:hover { transform: translateY(-6px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
 
-/* ============ GALERÍA (Zoom al hover) ============ */
+/* Galería (zoom al hover) */
 .galeria-item img { transition: transform 0.5s ease; }
 .galeria-item:hover img { transform: scale(1.1); } /* Zoom al pasar el mouse */
 .galeria-item .overlay { transition: transform var(--transicion); }
 .galeria-item:hover .overlay { transform: translateY(0); } /* Overlay aparece desde abajo */
 
-/* ============ CARRITO (Items) ============ */
+/* Carrito (items) */
 .carrito-item { transition: transform var(--transicion); }
 .carrito-item:hover { transform: translateX(4px); } /* Se desplaza a la derecha */
 
-/* ============ TABLAS (Filas) ============ */
+/* Tablas (filas) */
 tbody tr { transition: background-color var(--transicion), transform var(--transicion); }
 tbody tr:hover { transform: scale(1.01); } /* La fila se agranda ligeramente */
 
-/* ============ TRANSICIONES GLOBALES ============ */
+/* Transiciones globales */
 /* Lista de elementos que comparten la misma duración y función de timing */
 .tarjeta, .btn, .badge, img, .form-opciones label, .lista-valores li,
 .footer-col a, .modal-cerrar, .carrito-sidebar-header .btn-cerrar,
@@ -145,13 +293,14 @@ tbody tr:hover { transform: scale(1.01); } /* La fila se agranda ligeramente */
   transition-timing-function: ease;
 }
 
-/* ============ SPINNER ============ */
+/* Spinner */
 .carga-spinner::after {
   animation: spin 0.8s linear infinite; /* Rotación continua del spinner */
 }
 
-/* ============ TARJETAS CON ANIMACIÓN DE ENTRADA ============ */
+/* Tarjetas con animación de entrada */
 /* Si la tarjeta tiene un style con animation-delay (JS), se anima con fadeInUp */
 .tarjeta[style*="animation-delay"] {
   animation: fadeInUp 0.5s ease both;
 }
+

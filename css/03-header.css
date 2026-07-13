@@ -1,9 +1,9 @@
-/* ============================================
-   menu.css - Estilos del header, logo, navegación y menú responsive
-   Barra superior sticky, menú hamburguesa para móvil, badge del carrito
-   ============================================ */
+/* Cabecera y Barra de Navegación */
 
-/* ============ HEADER STICKY ============ */
+/* Menu.css - estilos del header, logo, navegación y menú responsive
+   barra superior sticky, menú hamburguesa para móvil, badge del carrito */
+
+/* Header sticky */
 header {
   background-color: var(--header-bg, var(--color-principal));
   position: sticky;
@@ -12,7 +12,7 @@ header {
   box-shadow: 0 2px 10px rgba(0,0,0,0.4);
 }
 
-/* --- Contenedor flex del header: logo a la izquierda, nav a la derecha --- */
+/* Contenedor flex del header: logo a la izquierda, nav a la derecha */
 .header-contenido {
   max-width: 1200px;
   margin: 0 auto;
@@ -23,7 +23,7 @@ header {
   height: var(--header-altura); /* Altura fija definida en style.css (70px) */
 }
 
-/* ============ LOGO ============ */
+/* Logo */
 .logo {
   display: flex;
   align-items: center;
@@ -60,14 +60,14 @@ header {
   text-transform: uppercase;
 }
 
-/* ============ NAVEGACIÓN PRINCIPAL ============ */
+/* Navegación principal */
 #menuNav ul {
   list-style: none;
   display: flex;
   gap: 18px;
 }
 
-/* --- Enlaces de navegación: mayúsculas con subrayado animado --- */
+/* Enlaces de navegación: mayúsculas con subrayado animado */
 #menuNav ul li a {
   color: var(--color-texto);
   font-size: 0.85rem;
@@ -86,7 +86,7 @@ header {
 }
 #menuNav ul li a:hover { transform: translateY(-2px); } /* Eleva ligeramente el enlace */
 
-/* ============ BOTÓN HAMBURGUESA (Móvil) ============ */
+/* Botón hamburguesa (móvil) */
 .btn-menu {
   display: none; /* Oculto en desktop, visible en móvil (600px) */
   flex-direction: column;
@@ -104,7 +104,7 @@ header {
 }
 .btn-menu:hover { background-color: rgba(232, 184, 75, 0.1); }
 
-/* --- Las 3 líneas del menú hamburguesa --- */
+/* Las 3 líneas del menú hamburguesa */
 .btn-menu span {
   display: block;
   width: 100%;
@@ -113,12 +113,12 @@ header {
   border-radius: 2px;
   transition: transform var(--transicion), opacity var(--transicion);
 }
-/* --- Animación de las líneas al abrir: convierten las 3 líneas en una X --- */
+/* Animación de las líneas al abrir: convierten las 3 líneas en una x */
 .btn-menu.activo span:nth-child(1) { transform: translateY(7px) rotate(45deg); }   /* Línea superior: baja y rota 45° */
 .btn-menu.activo span:nth-child(2) { opacity: 0; }                                /* Línea del medio: desaparece */
 .btn-menu.activo span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); } /* Línea inferior: sube y rota -45° */
 
-/* ============ BADGE DEL CARRITO ============ */
+/* Badge del carrito */
 #carritoBadge {
   position: absolute;
   top: -6px;
@@ -146,19 +146,19 @@ header {
   right: -14px;
 }
 
-/* ============ RESPONSIVE ============ */
+/* Responsive */
 
-/* --- Tablets (<=900px): reduce tamaño de fuente y gap --- */
+/* Tablets (<=900px): reduce tamaño de fuente y gap */
 @media (max-width: 900px) {
   #menuNav ul { gap: 14px; }
   #menuNav ul li a { font-size: 0.78rem; }
 }
 
-/* --- Móviles (<=600px): menú hamburguesa + menú deslizante --- */
+/* Móviles (<=600px): menú hamburguesa + menú deslizante */
 @media (max-width: 600px) {
   .btn-menu { display: flex; } /* Muestra el botón hamburguesa */
 
-  /* --- Menú en panel deslizante desde arriba --- */
+  /* Menú en panel deslizante desde arriba */
   #menuNav {
     position: fixed;
     top: var(--header-altura); /* Justo debajo del header */
@@ -166,7 +166,7 @@ header {
     right: 0;
     background-color: var(--color-principal);
     padding: 20px;
-    box-shadow: var(--sombra-fuerte);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
     transform: translateY(-120%); /* Oculto por encima de la pantalla */
     opacity: 0;
     transition: transform 0.4s ease, opacity 0.4s ease;
@@ -174,7 +174,7 @@ header {
   }
   #menuNav.visible { transform: translateY(0); opacity: 1; } /* Clase .visible activada por JS para mostrar */
 
-  /* --- Enlaces apilados verticalmente --- */
+  /* Enlaces apilados verticalmente */
   #menuNav ul {
     flex-direction: column;
     gap: 0;
@@ -191,12 +191,12 @@ header {
   .logo-slogan { display: none; } /* Oculta el slogan para ahorrar espacio horizontal */
 }
 
-/* --- Móviles pequeños (<=400px): reduce aún más el logo --- */
+/* Móviles pequeños (<=400px): reduce aún más el logo */
 @media (max-width: 400px) {
   .logo-nombre { font-size: 1rem; }
 }
 
-/* ============ MENÚ DESPLEGABLE (Dropdown) ============ */
+/* Menú desplegable (dropdown) */
 .menu-desplegable {
   position: relative;
 }
@@ -207,7 +207,7 @@ header {
   left: 0;
   background-color: var(--color-secundario);
   min-width: 180px;
-  box-shadow: var(--sombra-fuerte);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   border-radius: var(--radio);
   list-style: none;
   padding: 8px 0;
@@ -259,81 +259,7 @@ header {
   padding-left: 20px;
 }
 
-/* ============ BOTÓN VOLVER ARRIBA ============ */
-#btn-subir {
-  display: none;
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 99;
-  border: none;
-  background-color: var(--color-acento);
-  color: var(--color-principal);
-  cursor: pointer;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  font-size: 1.3rem;
-  box-shadow: var(--sombra);
-  transition: transform var(--transicion), opacity var(--transicion);
-}
-#btn-subir:hover {
-  transform: scale(1.1);
-  background-color: var(--color-acento-claro);
-}
-#btn-subir.visible {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 
-/* ============ BOTÓN MODO DÍA/NOCHE ============ */
-#toggle-theme {
-  cursor: pointer;
-  white-space: nowrap;
-  background: none;
-  border: none;
-  color: var(--color-texto);
-  font-family: var(--fuente-cuerpo);
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 5px 0;
-  border-bottom: 2px solid transparent;
-  transition: border-color var(--transicion), color var(--transicion), transform var(--transicion);
-  display: inline-block;
-}
-#toggle-theme:hover,
-body.light-mode #toggle-theme:hover {
-  color: var(--color-acento);
-  border-bottom-color: var(--color-acento);
-  transform: translateY(-2px);
-}
-body.light-mode #toggle-theme {
-  color: #1a1a2e;
-}
 
-@media (max-width: 600px) {
-  #toggle-theme {
-    display: block;
-    width: 100%;
-    text-align: left;
-    padding: 14px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 0.9rem;
-    color: var(--color-texto);
-    background: none;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    border-radius: 0;
-    letter-spacing: 0.5px;
-  }
-  #toggle-theme:hover {
-    color: var(--color-acento);
-    padding-left: 20px;
-  }
-  body.light-mode #toggle-theme {
-    color: var(--color-texto);
-  }
-}
+
+
