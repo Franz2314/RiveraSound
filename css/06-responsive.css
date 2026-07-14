@@ -52,44 +52,6 @@
 
 /* Mobile (max 600px) */
 @media (max-width: 600px) {
-  .btn-menu {
-    display: flex;
-  }
-
-  #menuNav {
-    position: fixed;
-    top: 70px;
-    left: 0;
-    right: 0;
-    background-color: var(--color-principal);
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-    transform: translateY(-120%);
-    opacity: 0;
-    transition: transform 0.4s ease, opacity 0.4s ease;
-    z-index: 999;
-  }
-
-  #menuNav.visible {
-    transform: translateY(0);
-    opacity: 1;
-  }
-
-  #menuNav ul {
-    flex-direction: column;
-    gap: 0;
-  }
-
-  #menuNav ul li a {
-    display: block;
-    padding: 14px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-
-  #menuNav ul li a:hover {
-    padding-left: 20px;
-  }
-
   .hero {
     padding: 50px 20px;
   }
@@ -272,44 +234,36 @@
   }
 }
 
-/* Estilos adicionales del tema oscuro permanente */
-.tarjeta {
-  border-top-color: var(--color-acento);
-}
-
+/* Estilos para tema oscuro (usando variables para que modo-noche funcione) */
 .tarjeta p {
-  color: #aaa;
-}
-
-.lista-valores li {
-  border-bottom-color: #333;
-}
-
-.lista-valores li:hover {
-  color: var(--color-acento);
+  color: var(--color-gris);
 }
 
 tbody tr:nth-child(even) {
-  background-color: #2a2a4a;
+  background-color: rgba(255,255,255,0.04);
 }
 
 tbody td {
-  color: #ccc;
+  color: var(--color-texto-oscuro);
 }
 
 .form-contenedor {
-  background-color: #2a2a4a;
+  background-color: var(--color-blanco);
 }
 
 .form-grupo input,
 .form-grupo select,
 .form-grupo textarea {
-  background-color: #1a1a30;
-  color: #e0e0e0;
-  border-color: #444;
+  background-color: var(--color-principal);
+  color: var(--color-texto);
+  border-color: rgba(255,255,255,0.15);
+}
+
+.lista-valores li {
+  border-bottom-color: rgba(255,255,255,0.08);
 }
 
 .seccion-nosotros-intro p {
-  color: #bbb !important;
+  color: var(--color-gris) !important;
 }
 

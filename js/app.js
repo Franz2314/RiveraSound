@@ -13,10 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // 3. Carga el carrito desde localStorage y sincroniza el badge numérico del header
   RiveraSound.carrito.init();
   
-  // 4. Restaura la preferencia de tema (claro/oscuro) y bindea el botón de tema
+  // 4. Inicializa favoritos desde localStorage
+  RiveraSound.favoritos.init();
+  
+  // 6. Restaura la preferencia de tema (claro/oscuro) y bindea el botón de tema
   RiveraSound.theme.init();
   
-  // 5. Arranca el enrutador SPA: lee el hash (#) actual en la barra de direcciones
+  // 7. Arranca el enrutador SPA: lee el hash (#) actual en la barra de direcciones
   // e inyecta la vista dinámica correspondiente en el contenedor principal.
   RiveraSound.router.init();
   

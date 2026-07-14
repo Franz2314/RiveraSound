@@ -17,6 +17,7 @@ RiveraSound.router = {
     '#contacto': 'contacto',
     '#blog': 'blog',
     '#carrito': 'carrito',
+    '#favoritos': 'favoritos',
     '#cuenta': 'cuenta',
     '#cuenta-login': 'cuenta-login',
     '#cuenta-registro': 'cuenta-registro',
@@ -37,6 +38,7 @@ RiveraSound.router = {
     'contacto': 'PaginasHTML/Contacto/contacto.html',
     'blog': 'PaginasHTML/Blog/blog.html',
     'carrito': 'PaginasHTML/Compras/carrito.html',
+    'favoritos': 'PaginasHTML/Favoritos/favoritos.html',
     'cuenta': 'PaginasHTML/Cuenta/cuenta.html',
     'cuenta-login': 'PaginasHTML/Cuenta/cuenta.html',
     'cuenta-registro': 'PaginasHTML/Cuenta/cuenta.html',
@@ -84,18 +86,25 @@ RiveraSound.router = {
     window.addEventListener('hashchange', () => { this.resolve(); });
     
     document.addEventListener('click', (e) => {
+      /* Clic en tarjeta de categoría en la home (data-categoria): navega al catálogo y filtra */
+      const card = e.target.closest('.tarjeta[data-categoria]');
+      if (card) {
+        e.preventDefault();
+        this._filtroActivo = card.getAttribute('data-categoria');
+        window.location.hash = 'instrumentos';
+        return;
+      }
+
       const link = e.target.closest('a[href^="#"]');
       if (!link) return;
       
-      e.preventDefault(); // Detiene el comportamiento de recarga del navegador
+      e.preventDefault();
       
-      // Capturamos filtros opcionales del catálogo si el enlace los provee
       const filtro = link.getAttribute('data-filtro');
       if (filtro) {
         this._filtroActivo = filtro;
       }
       
-      // Cambiamos el hash de la dirección para disparar el evento hashchange
       window.location.hash = link.getAttribute('href').slice(1);
     });
   },
@@ -182,22 +191,35 @@ RiveraSound.router = {
   /**
    * afterRender: Asigna lógica interactiva o scripts tras inyectar la vista en la pantalla.
    */
+  /* Activa interactividad tras inyectar HTML en la SPA */
   afterRender(route) {
-    // Intentamos activar los Intersection Observers de scroll reveal y contadores numéricos
+    /* Si venimos del menú desplegable (Viento/Cuerda/etc.), marcamos el filtro antes de renderizar */
+    if (route === 'instrumentos' || route === 'catalogo') {
+      if (this._filtroActivo) {
+        const btnActivo = document.querySelector(`.btn-filtro[data-categoria="${this._filtroActivo}"]`);
+        if (btnActivo) {
+          document.querySelectorAll('.btn-filtro').forEach((b) => b.classList.remove('activo'));
+          btnActivo.classList.add('activo');
+        }
+      }
+    }
+
+    /* iniciar() lee el filtro activo y renderiza con esa categoría */
     try { RiveraSound.catalogo.iniciar(); } catch (_) {}
     try { RiveraSound.reveal.iniciar(); } catch (_) {}
     try { RiveraSound.contadores.iniciar(); } catch (_) {}
     try { RiveraSound.carrito.renderSidebar(); } catch (_) {}
 
     if (route === 'instrumentos' || route === 'catalogo') {
-      if (this._filtroActivo) {
-        RiveraSound.catalogo.renderCatalogo(this._filtroActivo, '');
-        this._filtroActivo = null; // Limpiamos el filtro temporal
-      }
+      this._filtroActivo = null; /* Limpia el filtro temporal del menú */
     }
 
     if (route === 'carrito') {
       RiveraSound.carrito.renderPagina();
+    }
+
+    if (route === 'favoritos') {
+      RiveraSound.favoritos.renderPagina();
     }
 
     // Configuración específica de la página de contacto y formulario
@@ -307,7 +329,7 @@ RiveraSound.router = {
     const map = {
       inicio: 'inicio', instrumentos: 'instrumentos', catalogo: 'catalogo',
       ofertas: 'ofertas', nosotros: 'nosotros', contacto: 'contacto',
-      blog: 'blog', carrito: 'carrito', cuenta: 'cuenta',
+      blog: 'blog', carrito: 'carrito', favoritos: 'favoritos', cuenta: 'cuenta',
       'cuenta-login': 'cuenta', 'cuenta-registro': 'cuenta',
       'cuenta-perfil': 'cuenta', 'cuenta-pedidos': 'cuenta',
       '404': 'inicio'
@@ -791,34 +813,35 @@ RiveraSound.router = {
         </div>
       </div>
       
+      <!-- Sección de categorías: cada tarjeta tiene data-categoria para filtrar al hacer clic -->
       <section style="background-color: var(--color-fondo);">
         <div class="contenedor">
           <h2 class="titulo-seccion reveal">Nuestras Categorías</h2>
           <span class="linea-dorada reveal"></span>
           
           <div class="grid-tarjetas">
-            <div class="tarjeta reveal">
+            <div class="tarjeta reveal" data-categoria="viento" style="cursor:pointer;">
               <div class="tarjeta-icono">📯</div>
               <h3>Viento</h3>
               <p>Saxofones, trompetas, flautas traversas y clarinetes.</p>
               <br>
               <a href="#instrumentos" class="btn btn-secundario">Ver más</a>
             </div>
-            <div class="tarjeta reveal">
+            <div class="tarjeta reveal" data-categoria="teclado" style="cursor:pointer;">
               <div class="tarjeta-icono">🎹</div>
               <h3>Teclado</h3>
               <p>Pianos digitales, controladores MIDI, sintetizadores.</p>
               <br>
               <a href="#instrumentos" class="btn btn-secundario">Ver más</a>
             </div>
-            <div class="tarjeta reveal">
+            <div class="tarjeta reveal" data-categoria="cuerda" style="cursor:pointer;">
               <div class="tarjeta-icono">🎸</div>
               <h3>Cuerda</h3>
               <p>Guitarras, violines, violonchelos, bajos, ukeleles.</p>
               <br>
               <a href="#instrumentos" class="btn btn-secundario">Ver más</a>
             </div>
-            <div class="tarjeta reveal">
+            <div class="tarjeta reveal" data-categoria="percusion" style="cursor:pointer;">
               <div class="tarjeta-icono">🥁</div>
               <h3>Percusión</h3>
               <p>Baterías, cajones peruanos, congas y bongós.</p>

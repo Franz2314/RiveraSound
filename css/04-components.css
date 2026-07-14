@@ -66,136 +66,57 @@
   color: var(--color-principal);
 }
 
-
-/* Header / nav - responsive */
-header {
-  background-color: var(--color-principal);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+/* Botón corazón de favoritos en tarjetas */
+.btn-fav:hover {
+  transform: scale(1.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-.header-contenido {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 70px;
+/* --- Tarjetas compactas para la página de favoritos --- */
+/* Grid más angosto para que las tarjetas se vean pequeñas y amigables */
+.tarjetas-fav {
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important;
+  gap: 12px !important;
 }
-
-.logo {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  transition: transform var(--transicion);
+/* Reduce el padding interno de cada tarjeta de favoritos */
+.tarjeta-fav {
+  padding: 16px 12px !important;
 }
-
-.logo:hover {
-  transform: scale(1.03);
-}
-
-.logo-icono {
-  font-size: 2rem;
-  color: var(--color-acento);
-  transition: transform var(--transicion);
-}
-
-.logo:hover .logo-icono {
-  animation: float 2s ease-in-out infinite;
-}
-
-.logo-texto {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.logo-nombre {
-  font-family: var(--fuente-titulo);
-  font-size: 1.4rem;
-  font-weight: bold;
-  color: var(--color-acento);
-  letter-spacing: 1px;
-}
-
-.logo-slogan {
-  font-size: 0.65rem;
-  color: #aaa;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-/* Desktop navigation */
-#menuNav ul {
-  list-style: none;
-  display: flex;
-  gap: 30px;
-}
-
-#menuNav ul li a {
-  color: var(--color-texto);
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  padding: 5px 0;
-  border-bottom: 2px solid transparent;
-  transition: border-color var(--transicion), color var(--transicion), transform var(--transicion);
-  display: inline-block;
-}
-
-#menuNav ul li a:hover,
-#menuNav ul li a.activo {
-  color: var(--color-acento);
-  border-bottom-color: var(--color-acento);
-}
-
-#menuNav ul li a:hover {
-  transform: translateY(-2px);
-}
-
-/* Hamburger button */
-.btn-menu {
-  display: none;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  width: 44px;
-  height: 44px;
-  background: transparent;
-  border: 2px solid var(--color-acento);
-  border-radius: var(--radio);
-  cursor: pointer;
-  padding: 10px;
-  gap: 5px;
-  transition: background-color var(--transicion), border-color var(--transicion);
-}
-
-.btn-menu:hover {
-  background-color: rgba(232, 184, 75, 0.1);
-}
-
-.btn-menu span {
-  display: block;
+/* Imagen más pequeña dentro de la tarjeta compacta */
+.tarjeta-fav-img {
   width: 100%;
-  height: 2px;
-  background-color: var(--color-acento);
-  border-radius: 2px;
-  transition: transform var(--transicion), opacity var(--transicion);
+  height: 100px;
+  object-fit: cover;
+  border-radius: var(--radio);
+  margin-bottom: 8px;
 }
-
-.btn-menu.activo span:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
+/* Contenedor flexible para los botones de acción (carrito y quitar) */
+.tarjeta-fav-acciones {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  margin-top: 8px;
 }
-
-.btn-menu.activo span:nth-child(2) {
-  opacity: 0;
+/* Botones de acción más pequeños */
+.tarjeta-fav-acciones .btn {
+  padding: 6px 12px;
+  font-size: 0.75rem;
+  min-width: 36px;
 }
-
-.btn-menu.activo span:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
+/* Botón para quitar de favoritos, con borde rojo */
+.btn-fav-quitar {
+  background: transparent;
+  border: 1px solid var(--color-error);
+  color: var(--color-error);
+  border-radius: var(--radio);
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background .2s;
+}
+.btn-fav-quitar:hover {
+  background: var(--color-error);
+  color: #fff;
 }
 
 
@@ -239,7 +160,7 @@ header {
 
 .hero p {
   font-size: 1.1rem;
-  color: #ccc;
+  color: var(--color-texto-oscuro);
   margin-bottom: 32px;
   max-width: 500px;
   margin-left: auto;
@@ -255,15 +176,6 @@ header {
   animation: fadeInUp 1s ease 0.6s both;
 }
 
-
-/* Tarjetas (grid) */
-.grid-tarjetas {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 28px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
 
 .tarjeta {
   background-color: var(--color-blanco);
@@ -319,7 +231,7 @@ header {
 
 .tarjeta p {
   font-size: 0.9rem;
-  color: #555;
+  color: var(--color-gris);
   transition: color var(--transicion);
 }
 
@@ -389,7 +301,7 @@ thead:hover th::after {
 }
 
 tbody tr {
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
   transition: transform var(--transicion);
 }
 
@@ -398,7 +310,7 @@ tbody tr:last-child {
 }
 
 tbody tr:nth-child(even) {
-  background-color: #faf8f4;
+  background-color: rgba(255,255,255,0.04);
 }
 
 tbody tr:hover {
@@ -408,7 +320,7 @@ tbody tr:hover {
 
 tbody td {
   padding: 14px 18px;
-  color: #333;
+  color: var(--color-texto-oscuro);
 }
 
 .badge {
@@ -517,7 +429,7 @@ tbody td {
 .form-grupo input:hover,
 .form-grupo select:hover,
 .form-grupo textarea:hover {
-  border-color: #bbb;
+  border-color: var(--color-acento-claro);
 }
 
 .form-grupo input:user-invalid,
@@ -631,7 +543,7 @@ tbody td {
 
 .lista-valores li {
   padding: 10px 0;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-borde);
   font-size: 0.95rem;
   transition: padding-left var(--transicion), color var(--transicion);
 }
@@ -690,7 +602,7 @@ tbody td {
 }
 
 .banner-cta p {
-  color: #bbb;
+  color: var(--color-texto-oscuro);
   margin-bottom: 28px;
   font-size: 1.05rem;
   position: relative;
@@ -731,7 +643,7 @@ tbody td {
 }
 
 .page-header p {
-  color: #aaa;
+  color: var(--color-texto-oscuro);
   font-size: 1rem;
   animation: fadeInUp 0.8s ease 0.2s both;
 }
@@ -754,9 +666,7 @@ tbody td {
   animation: spin 0.8s linear infinite;
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
+
 
 .carga-error {
   text-align: center;
@@ -777,7 +687,7 @@ tbody td {
 .btn-filtro {
   padding: 8px 20px;
   background-color: var(--color-blanco);
-  border: 2px solid #ddd;
+  border: 2px solid var(--color-borde);
   border-radius: 20px;
   cursor: pointer;
   font-family: var(--fuente-cuerpo);
@@ -808,7 +718,7 @@ tbody td {
 .filtro-busqueda input {
   width: 100%;
   padding: 14px 18px;
-  border: 2px solid #ddd;
+  border: 2px solid var(--color-borde);
   border-radius: 30px;
   font-family: var(--fuente-cuerpo);
   font-size: 0.95rem;
@@ -823,7 +733,7 @@ tbody td {
 }
 
 .filtro-busqueda input::placeholder {
-  color: #aaa;
+  color: var(--color-gris);
 }
 
 
@@ -837,7 +747,7 @@ tbody td {
   color: white;
   font-weight: bold;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  z-index: 2000;
+  z-index: 3000;
   animation: slideDown 0.4s ease, fadeOut 0.4s ease 2.6s forwards;
   max-width: 350px;
 }
@@ -852,13 +762,6 @@ tbody td {
 
 .notificacion.info {
   background-color: var(--color-info);
-}
-
-@keyframes fadeOut {
-  to {
-    opacity: 0;
-    transform: translateX(50px);
-  }
 }
 
 
@@ -980,24 +883,6 @@ tbody td {
   padding-right: 30px; /* Espacio para que no se superponga con el botón cerrar */
 }
 
-/* Notificaciones toast */
-.notificacion {
-  position: fixed;
-  top: 90px;           /* Debajo del header (70px) + margen */
-  right: 20px;
-  padding: 16px 24px;
-  border-radius: var(--radio);
-  color: white;
-  font-weight: bold;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  z-index: 3000;       /* Por encima de todo (modales incluidos) */
-  animation: slideDown 0.4s ease, fadeOut 0.4s ease 2.6s forwards; /* Entrada deslizando, luego se desvanece a los 2.6s (ver animaciones.css) */
-  max-width: 350px;
-}
-.notificacion.exito { background-color: var(--color-exito); }  /* Verde para éxito */
-.notificacion.error { background-color: var(--color-error); }   /* Rojo para error */
-.notificacion.info { background-color: var(--color-info); }     /* Azul para información */
-
 /* Sidebar del carrito */
 .carrito-sidebar {
   position: fixed;
@@ -1016,14 +901,14 @@ tbody td {
 
 .carrito-sidebar-header {
   padding: 20px 24px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 .carrito-sidebar-header h3 {
   font-family: var(--fuente-titulo);
-  color: var(--color-principal);
+  color: var(--color-texto);
 }
 .carrito-sidebar-header .btn-cerrar {
   background: none;
@@ -1047,7 +932,7 @@ tbody td {
   gap: 12px;
   align-items: center;
   padding: 12px 0;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .carrito-sidebar-item .cs-emoji { font-size: 1.6rem; }
 .carrito-sidebar-item .cs-info { flex: 1; }
@@ -1066,7 +951,7 @@ tbody td {
 
 .carrito-sidebar-footer {
   padding: 20px 24px;
-  border-top: 2px solid #eee;
+  border-top: 2px solid rgba(255,255,255,0.1);
 }
 .carrito-sidebar-total {
   display: flex;
@@ -1127,7 +1012,7 @@ tbody td {
 }
 .blog-tarjeta-body { padding: 24px; }
 .blog-tarjeta-body h3 { font-family: var(--fuente-titulo); color: var(--color-acento); margin-bottom: 8px; }
-.blog-tarjeta-body p { color: #ccc; font-size: 0.95rem; line-height: 1.7; }
+.blog-tarjeta-body p { color: var(--color-texto-oscuro); font-size: 0.95rem; line-height: 1.7; }
 .blog-tarjeta-body .blog-fecha { font-size: 0.75rem; color: var(--color-gris); margin-top: 12px; display: block; }
 
 /* Carrito (página) */
@@ -1140,7 +1025,7 @@ tbody td {
 .carrito-item .item-precio { font-weight: bold; color: var(--color-acento); font-size: 1.1rem; }
 .carrito-item .btn-eliminar { background: none; border: none; font-size: 1.3rem; cursor: pointer; opacity: 0.4; transition: opacity var(--transicion); }
 .carrito-item .btn-eliminar:hover { opacity: 1; }
-.carrito-total { text-align: right; padding: 20px; font-size: 1.2rem; font-weight: bold; border-top: 2px solid #eee; margin-top: 16px; }
+.carrito-total { text-align: right; padding: 20px; font-size: 1.2rem; font-weight: bold; border-top: 2px solid rgba(255,255,255,0.1); margin-top: 16px; }
 .carrito-total span { color: var(--color-acento); font-size: 1.4rem; }
 
 /* Cuenta (login/registro con tabs) */

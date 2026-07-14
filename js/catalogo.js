@@ -162,6 +162,23 @@ RiveraSound.catalogo = {
     card.appendChild(precio);
     card.appendChild(stockDiv);
 
+    /* Botón de corazón favoritos: se muestra siempre, cambia entre 🤍 vacío y ❤️ lleno */
+    const btnFav = document.createElement('button');
+    btnFav.className = 'btn-fav';
+    btnFav.setAttribute('aria-label', 'Agregar a favoritos');
+    /* Consulta el estado actual en favoritos para mostrar el icono correcto */
+    btnFav.innerHTML = RiveraSound.favoritos.tiene(item.id) ? '❤️' : '🤍';
+    /* Posiciona el botón en la esquina superior derecha de la tarjeta */
+    btnFav.style.cssText = 'position:absolute;top:8px;right:8px;background:var(--color-principal);border:1px solid var(--color-borde);border-radius:50%;width:36px;height:36px;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s;z-index:2;';
+    /* Al hacer clic, alterna el estado y actualiza el icono sin propagar el evento al modal */
+    btnFav.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const agregado = RiveraSound.favoritos.toggle({ id: item.id, nombre: item.nombre, marca: item.marca, precio: item.precio, emoji: item.emoji, stock: item.stock });
+      btnFav.innerHTML = agregado ? '❤️' : '🤍';
+      RiveraSound.utils.notificar(agregado ? 'Agregado a favoritos' : 'Eliminado de favoritos', 'info');
+    });
+    card.appendChild(btnFav);
+
     // Si el producto tiene stock, añadimos el botón para agregar al carrito
     if (item.stock !== 'agotado') {
       const btnAgregar = document.createElement('button');
@@ -193,7 +210,7 @@ RiveraSound.catalogo = {
           <div style="width:100%;">
             <p style="font-size:0.9rem;color:var(--color-gris);margin-bottom:4px;">${item.marca}</p>
             <p style="font-size:1.1rem;margin-bottom:12px;line-height:1.4;">${item.desc}</p>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:#f9f9f9;border-radius:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--color-principal);border-radius:8px;">
               <span style="font-weight:bold;font-size:1.25rem;color:var(--color-acento);">${RiveraSound.utils.formatearPrecio(item.precio)}</span>
               ${this.badges[item.stock]}
             </div>
@@ -265,6 +282,9 @@ RiveraSound.catalogo = {
     cont.querySelectorAll('.tarjeta').forEach((el, index) => {
       el.style.animationDelay = `${index * 0.08}s`;
     });
+
+    // Scrollear suavemente hasta el grid de resultados
+    cont.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     // 3. Renderización en formato tabla alternativa si existe el elemento en el HTML
     if (tablaBody) {
@@ -387,7 +407,9 @@ RiveraSound.catalogo = {
 
     const catalogoCont = document.getElementById('catalogoDinamico');
     if (catalogoCont) {
-      this.renderCatalogo('todas', '');
+      const filtroActivo = document.querySelector('.btn-filtro.activo');
+      const cat = filtroActivo ? (filtroActivo.getAttribute('data-categoria') || 'todas') : 'todas';
+      this.renderCatalogo(cat, '');
       this.initFiltros();
     }
 
@@ -403,29 +425,30 @@ RiveraSound.catalogo = {
   },
 
   /**
-   * initFiltros: Configura escuchadores de clics en categorías y campos de entrada de búsqueda con retardo (debounce).
+   * initFiltros: Escucha clicks en los botones de categoría y escritura en búsqueda.
+   * Usa event delegation con flag data-listener para no acumular listeners al recargar la página vía SPA.
    */
   initFiltros() {
     const filtros = document.getElementById('filtrosCategoria');
     const busqueda = document.getElementById('busquedaInstrumento');
     if (!filtros && !busqueda) return;
 
-    // 1. Manejo de botones de filtrado de categoría
-    if (filtros) {
-      filtros.querySelectorAll('.btn-filtro').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          filtros.querySelectorAll('.btn-filtro').forEach((b) => b.classList.remove('activo'));
-          btn.classList.add('activo');
-          
-          const cat = btn.getAttribute('data-categoria') || 'todas';
-          const busq = busqueda ? busqueda.value : '';
-          this.renderCatalogo(cat, busq);
-        });
+    /* Delegación: un solo listener en el contenedor, funciona aunque los botones se reemplacen */
+    if (filtros && !filtros.hasAttribute('data-listener')) {
+      filtros.setAttribute('data-listener', '1');
+      filtros.addEventListener('click', (e) => {
+        const btn = e.target.closest('.btn-filtro');
+        if (!btn) return;
+        filtros.querySelectorAll('.btn-filtro').forEach((b) => b.classList.remove('activo'));
+        btn.classList.add('activo');
+        const cat = btn.getAttribute('data-categoria') || 'todas';
+        const busq = busqueda ? busqueda.value : '';
+        this.renderCatalogo(cat, busq);
       });
     }
 
-    // 2. Campo de búsqueda de texto con debounce para evitar sobrecarga del navegador
-    if (busqueda) {
+    if (busqueda && !busqueda.hasAttribute('data-listener')) {
+      busqueda.setAttribute('data-listener', '1');
       busqueda.addEventListener('input', RiveraSound.utils.debounce(() => {
         const activeBtn = filtros ? filtros.querySelector('.btn-filtro.activo') : null;
         const cat = activeBtn ? (activeBtn.getAttribute('data-categoria') || 'todas') : 'todas';

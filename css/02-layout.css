@@ -48,14 +48,14 @@ section {
 }
 
 .seccion-oscura .subtitulo-seccion {
-  color: #aaa;
+  color: var(--color-texto-oscuro);
 }
 
 
-/* Footer */
+/* Footer: usa variables de color para adaptarse al modo día */
 footer {
-  background: linear-gradient(135deg, var(--color-principal), #0d0d1a);
-  color: #aaa;
+  background: linear-gradient(135deg, var(--color-principal), var(--color-fondo-oscuro));
+  color: var(--color-texto);
   padding: 50px 20px 20px;
   border-top: 3px solid var(--color-acento);
 }
@@ -92,7 +92,7 @@ footer {
 .footer-col a {
   font-size: 0.85rem;
   line-height: 1.9;
-  color: #aaa;
+  color: var(--color-texto-oscuro);
   transition: color var(--transicion);
 }
 
@@ -116,8 +116,8 @@ footer {
 .footer-bottom {
   text-align: center;
   font-size: 0.8rem;
-  color: #666;
-  border-top: 1px solid rgba(255,255,255,0.08);
+  color: var(--color-gris);
+  border-top: 1px solid var(--color-borde);
   padding-top: 22px;
 }
 
