@@ -139,29 +139,39 @@ RiveraSound.router = {
     window.scrollTo({ top: 0, behavior: 'smooth' }); // Desplazamiento automático al inicio de pantalla
     this.updateNav(route); // Actualiza la apariencia visual del menú activo
 
-    // 1. Carga de vistas en memoria rápida
+    /* Transición de fade suave entre páginas */
+    app.classList.remove('fade-out');
+
+    /* Función auxiliar para inyectar contenido con fade-in */
+    const inyectar = (html, cb) => {
+      app.innerHTML = html;
+      /* Pequeño retraso para activar la transición CSS */
+      requestAnimationFrame(() => {
+        app.classList.remove('fade-out');
+      });
+      if (cb) cb();
+    };
+
+    /* 1. Carga de vistas en memoria rápida */
     if (route === 'inicio') {
-      app.innerHTML = this.renderInicio();
-      this.afterRender(route);
+      inyectar(this.renderInicio(), () => this.afterRender(route));
       return;
     }
 
     if (route === '404') {
-      app.innerHTML = this.render404();
-      this.afterRender(route);
+      inyectar(this.render404(), () => this.afterRender(route));
       return;
     }
 
-    // 2. Carga de fragmentos HTML por red (Fetch)
+    /* 2. Carga de fragmentos HTML por red (Fetch) */
     const file = this.pageFiles[route];
     if (!file) {
-      app.innerHTML = this.render404();
-      this.afterRender(route);
+      inyectar(this.render404(), () => this.afterRender(route));
       return;
     }
 
-    // Mostramos un spinner animado de CSS mientras se descarga la plantilla
-    app.innerHTML = '<div class="carga-spinner"></div>';
+    /* Mostramos un spinner animado de CSS mientras se descarga la plantilla */
+    inyectar('<div class="carga-spinner"></div>');
 
     fetch(file)
       .then((r) => {
@@ -169,13 +179,12 @@ RiveraSound.router = {
         return r.text();
       })
       .then((html) => {
-        app.innerHTML = html; // Inyecta el contenido HTML parcial
+        inyectar(html);
         this.postProcess(route, hash); // Ejecuta configuraciones previas a la interacción
         this.afterRender(route); // Dispara la inicialización de interactividad
       })
       .catch(() => {
-        app.innerHTML = this.render404();
-        this.afterRender(route);
+        inyectar(this.render404(), () => this.afterRender(route));
       });
   },
 
@@ -758,9 +767,13 @@ RiveraSound.router = {
             <a href="#contacto" class="btn btn-secundario">Contáctanos</a>
           </div>
         </div>
+        <div class="scroll-indicator" onclick="document.getElementById('porque-elegir').scrollIntoView({behavior:'smooth'})">
+          <span>Descubre más</span>
+          <span>↓</span>
+        </div>
       </section>
       
-      <section style="background-color: var(--color-fondo);">
+      <section id="porque-elegir" style="background-color: var(--color-fondo);">
         <div class="contenedor">
           <h2 class="titulo-seccion reveal">¿Por qué elegir RiveraSound?</h2>
           <span class="linea-dorada reveal"></span>

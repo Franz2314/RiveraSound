@@ -30,20 +30,20 @@
 
 /* Modo día: al activar .modo-dia en <html> se sobreescriben las variables con una paleta clara */
 html.modo-dia {
-  --color-principal: #eef3f7;      /* Fondo principal gris azulado claro */
-  --color-secundario: #e2e8f0;     /* Fondo secundario ligeramente más oscuro */
-  --color-fondo-claro: #f5f8fa;    /* Fondo de secciones alternas */
-  --color-fondo-oscuro: #d6dfe8;   /* Fondo degradado para banners */
-  --color-texto: #2c3e50;           /* Texto principal azul pizarra */
-  --color-texto-oscuro: #4a5b6e;   /* Texto secundario más claro */
+  --color-principal: #f5f7fa;      /* Fondo principal blanco hueso */
+  --color-secundario: #eef1f5;     /* Fondo secundario muy suave */
+  --color-fondo-claro: #ffffff;    /* Fondo de secciones alternas blanco puro */
+  --color-fondo-oscuro: #1a2a4a;   /* Azul marino profundo para banners/destacar */
+  --color-texto: #1a2a4a;          /* Texto principal azul marino */
+  --color-texto-oscuro: #3d4f6f;   /* Texto secundario azul grisáceo */
   --color-blanco: #ffffff;         /* Fondo de tarjetas y contenedores */
-  --color-gris: #7a8a9a;           /* Texto gris suave */
-  --color-acento: #0f3460;         /* Acento azul oscuro institucional */
-  --color-acento-claro: #4a7b9d;   /* Acento más claro para hovers */
-  --sombra: 0 4px 15px rgba(15,52,96,0.08);
-  --sombra-fuerte: 0 8px 30px rgba(15,52,96,0.12);
-  --sombra-suave: 0 2px 8px rgba(15,52,96,0.04);
-  --color-borde: rgba(0,0,0,0.1);
+  --color-gris: #6b7a8f;           /* Texto gris suave */
+  --color-acento: #e8b84b;         /* Amarillo mostaza (mismo que modo oscuro) */
+  --color-acento-claro: #f0d48a;   /* Amarillo claro (mismo que modo oscuro) */
+  --sombra: 0 4px 15px rgba(26,42,74,0.08);
+  --sombra-fuerte: 0 8px 30px rgba(26,42,74,0.12);
+  --sombra-suave: 0 2px 8px rgba(26,42,74,0.04);
+  --color-borde: rgba(26,42,74,0.12);
 }
 
 * {

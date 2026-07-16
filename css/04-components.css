@@ -122,7 +122,7 @@
 
 /* Hero */
 .hero {
-  background: linear-gradient(135deg, var(--color-principal) 0%, var(--color-secundario) 60%, var(--color-fondo-oscuro) 100%);
+  background: linear-gradient(135deg, var(--color-principal), var(--color-fondo-oscuro));
   color: var(--color-texto);
   padding: 100px 20px;
   text-align: center;
@@ -648,6 +648,22 @@ tbody td {
   animation: fadeInUp 0.8s ease 0.2s both;
 }
 
+/* Modo día: Hero, Banner, Page-header y Footer con azul marino sólido y texto blanco */
+html.modo-dia .hero,
+html.modo-dia .banner-cta,
+html.modo-dia .page-header,
+html.modo-dia footer {
+  background: #1a2a4a;
+}
+html.modo-dia .hero,
+html.modo-dia .hero p,
+html.modo-dia .banner-cta p,
+html.modo-dia .page-header p,
+html.modo-dia .footer-col p,
+html.modo-dia .footer-col a,
+html.modo-dia .footer-bottom {
+  color: #ffffff;
+}
 
 /* Dinamic loading (contenido cargado vía js) */
 .carga-spinner {
@@ -1080,5 +1096,98 @@ tbody td {
     padding: 10px 16px;
     font-size: 0.8rem;
   }
+}
+
+/* --- Carrusel de ofertas --- */
+.carrusel-wrapper {
+  position: relative;
+  overflow: hidden;
+  margin: 0 -8px;
+}
+.carrusel-track {
+  display: flex;
+  gap: 20px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 8px;
+  scrollbar-width: none;
+}
+.carrusel-track::-webkit-scrollbar {
+  display: none;
+}
+.carrusel-track .tarjeta {
+  flex: 0 0 280px;
+  scroll-snap-align: start;
+  padding: 24px 18px;
+  /* Animación de entrada escalonada */
+  opacity: 0;
+  animation: fadeInUp 0.5s ease forwards;
+}
+.carrusel-track .tarjeta:nth-child(1) { animation-delay: 0s; }
+.carrusel-track .tarjeta:nth-child(2) { animation-delay: 0.08s; }
+.carrusel-track .tarjeta:nth-child(3) { animation-delay: 0.16s; }
+.carrusel-track .tarjeta:nth-child(4) { animation-delay: 0.24s; }
+.carrusel-track .tarjeta:nth-child(5) { animation-delay: 0.32s; }
+.carrusel-track .tarjeta:nth-child(6) { animation-delay: 0.4s; }
+.carrusel-track .tarjeta:nth-child(7) { animation-delay: 0.48s; }
+.carrusel-track .tarjeta:nth-child(8) { animation-delay: 0.56s; }
+.carrusel-track .tarjeta:nth-child(9) { animation-delay: 0.64s; }
+.carrusel-track .tarjeta:nth-child(10) { animation-delay: 0.72s; }
+/* Zoom al pasar el mouse */
+.carrusel-track .tarjeta:hover {
+  transform: scale(1.04);
+  box-shadow: var(--sombra-fuerte);
+}
+.carrusel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 5;
+  background: var(--color-principal);
+  border: 2px solid var(--color-acento);
+  color: var(--color-acento);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transicion), color var(--transicion), transform var(--transicion);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+.carrusel-btn:hover {
+  background: var(--color-acento);
+  color: var(--color-principal);
+  transform: translateY(-50%) scale(1.1);
+}
+.carrusel-btn-izq {
+  left: -4px;
+}
+.carrusel-btn-der {
+  right: -4px;
+}
+
+/* Contenedor de indicadores (puntos) del carrusel */
+.carrusel-indicadores {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+.carrusel-indicador {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--color-gris);
+  border: none;
+  cursor: pointer;
+  transition: background var(--transicion), transform var(--transicion);
+}
+.carrusel-indicador.activo {
+  background: var(--color-acento);
+  transform: scale(1.3);
 }
 

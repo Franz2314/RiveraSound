@@ -72,7 +72,8 @@ RiveraSound.carrito = {
 
     this.guardar();
     RiveraSound.utils.notificar(`${producto.nombre} agregado al carrito`, 'exito');
-    this.renderSidebar(); // Refresca el menú lateral del carrito
+    this.renderSidebar();
+    this.animarBadge(); // Animación de rebote del badge
   },
 
   /**
@@ -138,6 +139,18 @@ RiveraSound.carrito = {
     const c = this.cantidad();
     badge.textContent = c;
     badge.style.display = c > 0 ? 'flex' : 'none'; // Se oculta si no hay unidades
+  },
+
+  /**
+   * animarBadge: Agrega animación de rebote al badge del carrito.
+   */
+  animarBadge() {
+    const badge = document.getElementById('carritoBadge');
+    if (!badge) return;
+    badge.classList.remove('bounce');
+    /* Forzamos reflow para reiniciar la animación */
+    void badge.offsetWidth;
+    badge.classList.add('bounce');
   },
 
   /**

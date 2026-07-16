@@ -49,14 +49,19 @@
       <input type="text" id="busquedaInstrumento" placeholder="Buscar instrumento o marca...">
     </div>
 
-    <!-- Botones de filtro por categoría -->
-    <div class="filtros-catalogo reveal" id="filtrosCategoria">
-      <button class="btn-filtro activo" data-categoria="todas">Todos</button>
-      <button class="btn-filtro" data-categoria="viento">Viento</button>
-      <button class="btn-filtro" data-categoria="cuerda">Cuerda</button>
-      <button class="btn-filtro" data-categoria="percusion">Percusión</button>
-      <button class="btn-filtro" data-categoria="teclado">Teclado</button>
+    <!-- Filtros sticky: se mantienen visibles al hacer scroll -->
+    <div class="filtros-sticky reveal">
+      <div class="filtros-catalogo" id="filtrosCategoria">
+        <button class="btn-filtro activo" data-categoria="todas">Todos</button>
+        <button class="btn-filtro" data-categoria="viento">Viento</button>
+        <button class="btn-filtro" data-categoria="cuerda">Cuerda</button>
+        <button class="btn-filtro" data-categoria="percusion">Percusión</button>
+        <button class="btn-filtro" data-categoria="teclado">Teclado</button>
+      </div>
     </div>
+
+    <!-- Contador de resultados dinámico -->
+    <div class="resultados-contador" id="resultadosContador"></div>
 
     <!-- Grid dinámico: el JS renderiza aquí las tarjetas de instrumentos -->
     <div class="grid-tarjetas" id="catalogoDinamico"></div>

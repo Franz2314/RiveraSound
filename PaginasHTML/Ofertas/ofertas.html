@@ -6,7 +6,7 @@
   <p>Los mejores precios en instrumentos seleccionados</p>
 </div>
 
-<!-- Sección de ofertas -->
+<!-- Sección de ofertas con carrusel dinámico -->
 <section>
   <div class="contenedor">
     <div class="ofertas-header">
@@ -14,8 +14,12 @@
       <h2>Instrumentos bajo S/ 1,000</h2>
       <p>Aprovecha estos instrumentos de calidad a precios increíbles</p>
     </div>
-    <!-- Grid dinámico: el JS carga aquí las tarjetas de ofertas desde la API -->
-    <div class="grid-tarjetas" id="ofertasGrid"></div>
+    <!-- Carrusel: el JS carga aquí las tarjetas de ofertas -->
+    <div class="carrusel-wrapper">
+      <div class="carrusel-track" id="ofertasTrack"></div>
+      <button class="carrusel-btn carrusel-btn-izq" id="ofertasPrev" aria-label="Anterior">‹</button>
+      <button class="carrusel-btn carrusel-btn-der" id="ofertasNext" aria-label="Siguiente">›</button>
+    </div>
   </div>
 </section>
 

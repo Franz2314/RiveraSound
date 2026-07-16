@@ -29,6 +29,10 @@ RiveraSound.theme = {
       btn.textContent = activo ? '☀️' : '🌙';
       btn.setAttribute('aria-label', activo ? 'Modo día activo' : 'Modo oscuro');
       localStorage.setItem('riverasound_modo_dia', activo);
+      /* Animación de giro en el botón */
+      btn.classList.remove('girar');
+      void btn.offsetWidth;
+      btn.classList.add('girar');
     });
   },
 

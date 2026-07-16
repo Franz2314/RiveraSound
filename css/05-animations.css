@@ -215,8 +215,152 @@ tbody tr:hover { transform: scale(1.01); } /* La fila se agranda ligeramente */
 }
 
 /* Tarjetas con animación de entrada */
-/* Si la tarjeta tiene un style con animation-delay (JS), se anima con fadeInUp */
 .tarjeta[style*="animation-delay"] {
   animation: fadeInUp 0.5s ease both;
+}
+
+/* Animación de destello para el badge de ofertas */
+@keyframes descuentoPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.05); }
+}
+.descuento {
+  animation: descuentoPulse 2s ease-in-out infinite;
+}
+
+/* Partículas flotantes (notas musicales) dentro del carrusel */
+.carrusel-wrapper::before,
+.carrusel-wrapper::after {
+  position: absolute;
+  font-size: 1.6rem;
+  opacity: 0.06;
+  pointer-events: none;
+  z-index: 1;
+}
+.carrusel-wrapper::before {
+  content: '🎵';
+  top: 4px;
+  left: 8%;
+  animation: float 4s ease-in-out infinite;
+}
+.carrusel-wrapper::after {
+  content: '🎶';
+  bottom: 4px;
+  right: 8%;
+  animation: float 5s ease-in-out infinite 1s;
+}
+
+/* Animación de rebote del badge del carrito al agregar items */
+@keyframes badgeBounce {
+  0% { transform: scale(1); }
+  25% { transform: scale(1.4); }
+  50% { transform: scale(0.85); }
+  75% { transform: scale(1.15); }
+  100% { transform: scale(1); }
+}
+#carritoBadge.bounce {
+  animation: badgeBounce 0.4s ease;
+}
+
+/* Animación del corazón favoritos */
+@keyframes heartPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.4); }
+  70% { transform: scale(0.85); }
+  100% { transform: scale(1); }
+}
+.btn-fav.pop {
+  animation: heartPop 0.4s ease;
+}
+
+/* Transición suave del modo día en elementos clave */
+html.modo-dia, html:not(.modo-dia) {
+  transition: background-color 0.4s ease, color 0.4s ease;
+}
+body, header, footer, section, .tarjeta, .btn, .btn-filtro, .form-grupo input, .form-grupo select, .form-grupo textarea, .page-header, .hero, .banner-cta, .filtros-sticky {
+  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Animación del botón modo día */
+@keyframes themeSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.btn-modo-noche.girar {
+  animation: themeSpin 0.5s ease;
+}
+
+/* Transición de fade entre páginas SPA */
+#app.fade-out {
+  opacity: 0;
+  transform: translateY(12px);
+}
+#app {
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+/* Indicador visual de scroll en hero (efecto parallax leve con JS) */
+.hero {
+  background-attachment: fixed;
+}
+@media (max-width: 600px) {
+  .hero {
+    background-attachment: scroll;
+  }
+}
+
+/* Contador de resultados del catálogo */
+.resultados-contador {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--color-gris);
+  margin-bottom: 12px;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Filtros sticky en catálogo */
+.filtros-sticky {
+  position: sticky;
+  top: var(--header-altura);
+  z-index: 10;
+  background: var(--color-principal);
+  padding: 12px 0;
+  border-bottom: 1px solid var(--color-borde);
+  margin-bottom: 16px;
+}
+
+/* Animación de tarjeta al agregar al carrito desde la card */
+@keyframes cardAdded {
+  0% { box-shadow: 0 0 0 0 var(--color-exito); }
+  50% { box-shadow: 0 0 0 4px rgba(40,167,69,0.3); }
+  100% { box-shadow: 0 0 0 0 rgba(40,167,69,0); }
+}
+.tarjeta.added-animation {
+  animation: cardAdded 0.6s ease;
+}
+
+/* Animación del indicador de scroll en el hero */
+@keyframes scrollIndicator {
+  0%, 100% { opacity: 0.4; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(6px); }
+}
+.scroll-indicator {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--color-texto-oscuro);
+  font-size: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.6;
+  animation: scrollIndicator 2s ease-in-out infinite;
+  cursor: pointer;
 }
 

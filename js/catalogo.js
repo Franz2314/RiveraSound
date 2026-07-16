@@ -175,6 +175,10 @@ RiveraSound.catalogo = {
       e.stopPropagation();
       const agregado = RiveraSound.favoritos.toggle({ id: item.id, nombre: item.nombre, marca: item.marca, precio: item.precio, emoji: item.emoji, stock: item.stock });
       btnFav.innerHTML = agregado ? '❤️' : '🤍';
+      /* Animación de rebote en el corazón */
+      btnFav.classList.remove('pop');
+      void btnFav.offsetWidth;
+      btnFav.classList.add('pop');
       RiveraSound.utils.notificar(agregado ? 'Agregado a favoritos' : 'Eliminado de favoritos', 'info');
     });
     card.appendChild(btnFav);
@@ -265,7 +269,13 @@ RiveraSound.catalogo = {
     }
 
     cont.innerHTML = '';
-    
+
+    /* Muestra contador de resultados */
+    const contador = document.getElementById('resultadosContador');
+    if (contador) {
+      contador.textContent = `Mostrando ${items.length} de ${this.instrumentos.length} instrumentos`;
+    }
+
     // Si no hay productos que coincidan, mostramos un aviso
     if (items.length === 0) {
       cont.innerHTML = '<div style="text-align:center;padding:40px;color:#888;grid-column:1/-1;">No se encontraron instrumentos.</div>';
@@ -330,19 +340,119 @@ RiveraSound.catalogo = {
   },
 
   /**
-   * renderOfertas: Filtra e inyecta los instrumentos con precio < S/1000 y en stock en la página de ofertas.
+   * renderOfertas: Filtra instrumentos con precio < S/1000 y stock disponible,
+   * los inyecta en un carrusel horizontal con scroll y botones de navegación.
    */
   renderOfertas() {
-    const cont = document.getElementById('ofertasGrid');
-    if (!cont) return;
-    
-    // Ofertas definidas académicamente como precio < S/1000 y stock disponible
+    const track = document.getElementById('ofertasTrack');
+    if (!track) return;
+
+    /* Filtra ofertas: precio < S/1000 y stock disponible */
     const ofertas = this.instrumentos.filter((i) => i.precio < 1000 && i.stock === 'disponible');
-    cont.innerHTML = '';
-    
+    track.innerHTML = '';
+
+    /* Renderiza cada tarjeta dentro del track del carrusel */
     ofertas.forEach((item) => {
-      cont.appendChild(this.crearTarjeta(item));
+      const card = this.crearTarjeta(item);
+      card.style.flex = '0 0 280px';
+      track.appendChild(card);
     });
+
+    /* Agrega indicadores (puntos) debajo del carrusel */
+    this._agregarIndicadoresCarrusel(track, ofertas.length);
+
+    /* Botones de navegación del carrusel */
+    this._vincularBotonesCarrusel(track);
+  },
+
+  /**
+   * _agregarIndicadoresCarrusel: Crea puntos indicadores que reflejan la posición actual.
+   */
+  _agregarIndicadoresCarrusel(track, total) {
+    if (total === 0) return;
+
+    /* Elimina indicadores anteriores si existen */
+    const contenedorViejo = document.querySelector('.carrusel-indicadores');
+    if (contenedorViejo) contenedorViejo.remove();
+
+    const contenedor = document.createElement('div');
+    contenedor.className = 'carrusel-indicadores';
+
+    for (let i = 0; i < total; i++) {
+      const punto = document.createElement('button');
+      punto.className = 'carrusel-indicador' + (i === 0 ? ' activo' : '');
+      punto.dataset.indice = i;
+      punto.addEventListener('click', () => {
+        const card = track.children[i];
+        if (card) card.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      });
+      contenedor.appendChild(punto);
+    }
+
+    track.parentElement.after(contenedor);
+  },
+
+  /**
+   * _vincularBotonesCarrusel: Vincula botones prev/next, auto-slide y actualiza indicadores al scrollear.
+   */
+  _vincularBotonesCarrusel(track) {
+    const prev = document.getElementById('ofertasPrev');
+    const next = document.getElementById('ofertasNext');
+    if (!prev || !next) return;
+
+    let intervalo = null;
+
+    /* Desplaza el carrusel automáticamente cada 4 segundos */
+    const iniciarAutoSlide = () => {
+      detenerAutoSlide();
+      intervalo = setInterval(() => {
+        const anchoCard = track.children[0]?.offsetWidth || 1;
+        const gap = 20;
+        /* Si llegó al final, vuelve al inicio */
+        if (track.scrollLeft + track.offsetWidth >= track.scrollWidth - 10) {
+          track.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          track.scrollBy({ left: anchoCard + gap, behavior: 'smooth' });
+        }
+      }, 4000);
+    };
+
+    const detenerAutoSlide = () => {
+      if (intervalo) clearInterval(intervalo);
+      intervalo = null;
+    };
+
+    /* Pausa al hover y reanuda al salir */
+    track.addEventListener('mouseenter', detenerAutoSlide);
+    track.addEventListener('mouseleave', iniciarAutoSlide);
+
+    /* Función para actualizar qué punto indicador está activo */
+    const actualizarIndicador = () => {
+      const puntos = document.querySelectorAll('.carrusel-indicador');
+      if (!puntos.length) return;
+      const anchoCard = track.children[0]?.offsetWidth || 1;
+      const idx = Math.round(track.scrollLeft / (anchoCard + 20));
+      puntos.forEach((p, i) => p.classList.toggle('activo', i === idx));
+    };
+
+    track.addEventListener('scroll', actualizarIndicador);
+
+    /* Botón anterior: desplaza a la card anterior */
+    prev.addEventListener('click', () => {
+      detenerAutoSlide();
+      const anchoCard = track.children[0]?.offsetWidth || 1;
+      track.scrollBy({ left: -(anchoCard + 20), behavior: 'smooth' });
+    });
+
+    /* Botón siguiente: desplaza a la card siguiente */
+    next.addEventListener('click', () => {
+      detenerAutoSlide();
+      const anchoCard = track.children[0]?.offsetWidth || 1;
+      track.scrollBy({ left: anchoCard + 20, behavior: 'smooth' });
+    });
+
+    /* Arranca auto-slide */
+    iniciarAutoSlide();
   },
 
   /**
@@ -413,8 +523,9 @@ RiveraSound.catalogo = {
       this.initFiltros();
     }
 
-    const ofertasCont = document.getElementById('ofertasGrid');
-    if (ofertasCont) {
+    /* Renderiza carrusel de ofertas si existe el track en la página */
+    const ofertasTrack = document.getElementById('ofertasTrack');
+    if (ofertasTrack) {
       this.renderOfertas();
     }
 
