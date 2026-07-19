@@ -22,7 +22,8 @@ RiveraSound.router = {
     '#cuenta-login': 'cuenta-login',
     '#cuenta-registro': 'cuenta-registro',
     '#cuenta-perfil': 'cuenta-perfil',
-    '#cuenta-pedidos': 'cuenta-pedidos'
+    '#cuenta-pedidos': 'cuenta-pedidos',
+    '#cuenta-admin': 'cuenta-admin'
   },
 
   /**
@@ -43,7 +44,8 @@ RiveraSound.router = {
     'cuenta-login': 'PaginasHTML/Cuenta/cuenta.html',
     'cuenta-registro': 'PaginasHTML/Cuenta/cuenta.html',
     'cuenta-perfil': 'PaginasHTML/Cuenta/cuenta.html',
-    'cuenta-pedidos': 'PaginasHTML/Cuenta/cuenta.html'
+    'cuenta-pedidos': 'PaginasHTML/Cuenta/cuenta.html',
+    'cuenta-admin': 'PaginasHTML/Cuenta/cuenta.html'
   },
 
   // Almacena la ruta que se encuentra visible actualmente
@@ -192,7 +194,7 @@ RiveraSound.router = {
    * postProcess: Lógica previa a la renderización interactiva (ej: inicializar pestañas de cuenta).
    */
   postProcess(route, hash) {
-    if (['cuenta', 'cuenta-login', 'cuenta-registro', 'cuenta-perfil', 'cuenta-pedidos'].indexOf(route) !== -1) {
+    if (['cuenta', 'cuenta-login', 'cuenta-registro', 'cuenta-perfil', 'cuenta-pedidos', 'cuenta-admin'].indexOf(route) !== -1) {
       this.initCuentaTabs(hash);
     }
   },
@@ -341,6 +343,7 @@ RiveraSound.router = {
       blog: 'blog', carrito: 'carrito', favoritos: 'favoritos', cuenta: 'cuenta',
       'cuenta-login': 'cuenta', 'cuenta-registro': 'cuenta',
       'cuenta-perfil': 'cuenta', 'cuenta-pedidos': 'cuenta',
+      'cuenta-admin': 'cuenta',
       '404': 'inicio'
     };
     const active = map[route] || 'inicio';
@@ -390,21 +393,47 @@ RiveraSound.router = {
       const tabsSesion = document.querySelectorAll('.cuenta-tab-sesion');
       const tabsPublicas = document.querySelectorAll('.cuenta-tab:not(.cuenta-tab-sesion)');
       
+      // Verificamos si el usuario activo es el administrador (cuenta demo)
+      let esAdmin = false;
+      if (haySesion) {
+        try {
+          const usuarioActivo = JSON.parse(localStorage.getItem('riverasound_usuario'));
+          esAdmin = usuarioActivo && usuarioActivo.correo === 'demo@riverasound.pe';
+        } catch (_) {}
+      }
+
       // Ocultamos pestañas de autenticación si ya hay sesión y viceversa
-      tabsSesion.forEach((t) => { t.style.display = haySesion ? '' : 'none'; });
+      tabsSesion.forEach((t) => {
+        if (t.getAttribute('data-tab') === 'admin') {
+          t.style.display = esAdmin ? '' : 'none'; // Solo admin ve este botón
+        } else {
+          t.style.display = haySesion ? '' : 'none';
+        }
+      });
       tabsPublicas.forEach((t) => { t.style.display = haySesion ? 'none' : ''; });
 
       const tabMap = {
-        'cuenta': 'login',
+        'cuenta': haySesion ? 'perfil' : 'login',
         'cuenta-login': 'login',
         'cuenta-registro': 'registro',
         'cuenta-perfil': 'perfil',
-        'cuenta-pedidos': 'pedidos'
+        'cuenta-pedidos': 'pedidos',
+        'cuenta-admin': 'admin'
       };
       
       const hashClean = hash.replace(/^#/, '');
-      const defaultTab = tabMap[hashClean] || (haySesion ? 'perfil' : 'login');
+      let defaultTab = tabMap[hashClean] || (haySesion ? 'perfil' : 'login');
+      
+      // Control de acceso de seguridad: si no es admin, redirige al perfil
+      if (defaultTab === 'admin' && !esAdmin) {
+        defaultTab = 'perfil';
+      }
+      
       activar(defaultTab);
+
+      if (defaultTab === 'admin') {
+        try { RiveraSound.admin.init(); } catch (_) {}
+      }
 
       /* --- INICIO DE SESIÓN LOCAL --- */
       const formLogin = document.getElementById('formLogin');
@@ -476,6 +505,7 @@ RiveraSound.router = {
 
           if (usuarioValido) {
             localStorage.setItem('riverasound_usuario', JSON.stringify(usuarioValido));
+            try { RiveraSound.favoritos.cargar(); } catch (_) {}
             RiveraSound.utils.notificar(`¡Bienvenido ${usuarioValido.nombre}!`, 'exito');
             
             // Re-organiza visibilidad de pestañas
@@ -493,7 +523,7 @@ RiveraSound.router = {
             }
             window.location.hash = 'cuenta-perfil';
           } else {
-            RiveraSound.utils.notificar('Credenciales inválidas. Usa demo@riverasound.pe / demo123', 'error');
+            RiveraSound.utils.notificar('Correo o contraseña incorrectos. Por favor, vuelve a intentarlo.', 'error');
           }
         });
       }
@@ -636,6 +666,7 @@ RiveraSound.router = {
       if (btnCerrar) {
         btnCerrar.addEventListener('click', () => {
           localStorage.removeItem('riverasound_usuario');
+          try { RiveraSound.favoritos.cargar(); } catch (_) {}
           RiveraSound.utils.notificar('Sesión cerrada con éxito', 'info');
           
           // Oculta/Muestra pestañas según cierre de sesión
@@ -678,7 +709,10 @@ RiveraSound.router = {
     const usuario = localStorage.getItem('riverasound_usuario');
     if (!usuario) return;
     
-    const correo = JSON.parse(usuario).correo;
+    const parsedUser = JSON.parse(usuario);
+    const correo = parsedUser.correo;
+    const esAdmin = correo === 'demo@riverasound.pe';
+    
     // Filtramos solo los pedidos del usuario logueado en sesión activa
     const pedidosUsuario = pedidos.filter((p) => p.usuario.trim().toLowerCase() === correo.trim().toLowerCase());
     
@@ -711,11 +745,30 @@ RiveraSound.router = {
         `;
       });
 
-      let opcionesEstado = '';
-      estados.forEach((est) => {
-        const seleccionado = est === p.estado ? 'selected' : '';
-        opcionesEstado += `<option value="${est}" ${seleccionado}>${est}</option>`;
-      });
+      let statusHtml = '';
+      if (esAdmin) {
+        // El administrador ve un menú selector interactivo
+        let opcionesEstado = '';
+        estados.forEach((est) => {
+          const seleccionado = est === p.estado ? 'selected' : '';
+          opcionesEstado += `<option value="${est}" ${seleccionado}>${est}</option>`;
+        });
+        statusHtml = `
+          <select class="estado-pedido-select" data-pedido="${p.id}" style="padding:4px 8px;border-radius:4px;border:1px solid #ccc;font-size:0.8rem;">
+            ${opcionesEstado}
+          </select>
+        `;
+      } else {
+        // Los clientes ven un badge estático y con diseño legible
+        const badgeMap = {
+          'Pendiente': '<span class="badge badge-pedido">Pendiente</span>',
+          'En envío': '<span class="badge badge-disponible" style="background:#007bff; color:white;">En envío</span>',
+          'Entregado': '<span class="badge badge-disponible" style="background:#28a745; color:white;">Entregado</span>',
+          'Recogido en tienda': '<span class="badge badge-disponible" style="background:#17a2b8; color:white;">Recogido en tienda</span>',
+          'Cancelado': '<span class="badge badge-agotado">Cancelado</span>'
+        };
+        statusHtml = badgeMap[p.estado] || `<span class="badge">${p.estado}</span>`;
+      }
 
       html += `
         <div style="background:var(--color-blanco);border-radius:var(--radio);box-shadow:0 2px 4px rgba(0, 0, 0, 0.1);padding:20px;margin-bottom:16px;border:1px solid #eee;">
@@ -725,13 +778,14 @@ RiveraSound.router = {
               <span style="color:var(--color-gris);font-size:0.8rem;margin-left:10px;">${p.fecha}</span>
             </div>
             <div style="display:flex;align-items:center;gap:8px;">
-              <select class="estado-pedido-select" data-pedido="${p.id}" style="padding:4px 8px;border-radius:4px;border:1px solid #ccc;font-size:0.8rem;">
-                ${opcionesEstado}
-              </select>
+              ${statusHtml}
             </div>
           </div>
           ${itemsHtml}
-          <div style="text-align:right;margin-top:10px;font-weight:bold;font-size:1.1rem;">Total: ${RiveraSound.utils.formatearPrecio(p.total)}</div>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding-top:8px;border-top:1px solid rgba(0,0,0,0.05);font-size:0.85rem;color:var(--color-gris);">
+            <span>Pago: <strong>${p.metodoPago || 'Efectivo / Transferencia'}</strong>${p.cuotas > 1 ? ` (${p.cuotas} cuotas de ${RiveraSound.utils.formatearPrecio(p.cuotaMonto)})` : ''}</span>
+            <span style="font-weight:bold;font-size:1.05rem;color:var(--color-texto);">Total: ${RiveraSound.utils.formatearPrecio(p.total)}</span>
+          </div>
         </div>
       `;
     });
@@ -739,7 +793,7 @@ RiveraSound.router = {
     html += '</div>';
     panel.innerHTML = html;
 
-    // Asignamos controladores al select de estado de pedidos (Admin simulator local)
+    // Asignamos controladores al select de estado de pedidos (Solo si hay selects)
     panel.querySelectorAll('.estado-pedido-select').forEach((sel) => {
       sel.addEventListener('change', function () {
         const pedidoId = this.getAttribute('data-pedido');

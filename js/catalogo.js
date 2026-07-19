@@ -7,9 +7,7 @@ RiveraSound.catalogo = {
 
   /* Base de datos local simulada */
   
-  // Lista maestra de todos los instrumentos musicales disponibles
-  // Cada producto contiene: id, nombre, marca, categoria, precio, stock, emoji, desc
-  instrumentos: [
+  defaultInstrumentos: [
     { id: 'sax-alto-yamaha', nombre: 'Saxofón Alto', marca: 'Yamaha YAS-280', categoria: 'viento', precio: 2850, stock: 'disponible', emoji: '🎷', desc: 'Ideal para principiantes. Sonido brillante.' },
     { id: 'sax-tenor-jupiter', nombre: 'Saxofón Tenor', marca: 'Jupiter JTS-700', categoria: 'viento', precio: 3400, stock: 'disponible', emoji: '🎷', desc: 'Potente sonido para intermedios.' },
     { id: 'sax-soprano-yamaha', nombre: 'Saxofón Soprano', marca: 'Yamaha YSS-475', categoria: 'viento', precio: 4200, stock: 'pedido', emoji: '🎷', desc: 'Recto, tono puro y afinación precisa.' },
@@ -46,6 +44,24 @@ RiveraSound.catalogo = {
     { id: 'controlador-novation', nombre: 'Controlador MIDI', marca: 'Novation Launchkey 49', categoria: 'teclado', precio: 1100, stock: 'disponible', emoji: '🎹', desc: '49 teclas con pads y perillas.' },
     { id: 'organo-hammond', nombre: 'Órgano Eléctrico', marca: 'Hammond XK-1C', categoria: 'teclado', precio: 6800, stock: 'pedido', emoji: '🎹', desc: 'Órgano portátil con ruedas tonewheel.' }
   ],
+
+  // Getter y setter dinámicos para instrumentos persistidos en localStorage
+  get instrumentos() {
+    const guardados = localStorage.getItem('riverasound_instrumentos');
+    if (guardados) {
+      try {
+        return JSON.parse(guardados);
+      } catch (_) {
+        return this.defaultInstrumentos;
+      }
+    }
+    // Inicialización por primera vez en localStorage
+    localStorage.setItem('riverasound_instrumentos', JSON.stringify(this.defaultInstrumentos));
+    return this.defaultInstrumentos;
+  },
+  set instrumentos(val) {
+    localStorage.setItem('riverasound_instrumentos', JSON.stringify(val));
+  },
 
   // Artículos del blog
   blogs: [
@@ -173,13 +189,22 @@ RiveraSound.catalogo = {
     /* Al hacer clic, alterna el estado y actualiza el icono sin propagar el evento al modal */
     btnFav.addEventListener('click', (e) => {
       e.stopPropagation();
+      
+      // Control de sesión: favoritos es exclusivo para usuarios logueados
+      if (!localStorage.getItem('riverasound_usuario')) {
+        RiveraSound.utils.notificar('Inicia sesión para guardar este instrumento en tus favoritos.', 'error');
+        return;
+      }
+
       const agregado = RiveraSound.favoritos.toggle({ id: item.id, nombre: item.nombre, marca: item.marca, precio: item.precio, emoji: item.emoji, stock: item.stock });
-      btnFav.innerHTML = agregado ? '❤️' : '🤍';
-      /* Animación de rebote en el corazón */
-      btnFav.classList.remove('pop');
-      void btnFav.offsetWidth;
-      btnFav.classList.add('pop');
-      RiveraSound.utils.notificar(agregado ? 'Agregado a favoritos' : 'Eliminado de favoritos', 'info');
+      if (agregado !== null) {
+        btnFav.innerHTML = agregado ? '❤️' : '🤍';
+        /* Animación de rebote en el corazón */
+        btnFav.classList.remove('pop');
+        void btnFav.offsetWidth;
+        btnFav.classList.add('pop');
+        RiveraSound.utils.notificar(agregado ? 'Agregado a favoritos' : 'Eliminado de favoritos', 'info');
+      }
     });
     card.appendChild(btnFav);
 
@@ -214,9 +239,36 @@ RiveraSound.catalogo = {
           <div style="width:100%;">
             <p style="font-size:0.9rem;color:var(--color-gris);margin-bottom:4px;">${item.marca}</p>
             <p style="font-size:1.1rem;margin-bottom:12px;line-height:1.4;">${item.desc}</p>
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--color-principal);border-radius:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--color-principal);border-radius:8px;margin-bottom:12px;">
               <span style="font-weight:bold;font-size:1.25rem;color:var(--color-acento);">${RiveraSound.utils.formatearPrecio(item.precio)}</span>
               ${this.badges[item.stock]}
+            </div>
+            
+            <!-- Simulador de Financiamiento -->
+            <div style="padding: 12px; border: 1px solid rgba(255,255,255,0.08); text-align: left; background: rgba(255,255,255,0.02); border-radius: 8px; margin-bottom: 12px;">
+              <h4 style="color: var(--color-acento); margin-bottom: 8px; font-size: 0.85rem; text-align: center; text-transform: uppercase; letter-spacing: 0.5px;">Simulador de Crédito</h4>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px;">
+                <div>
+                  <label for="simTarjeta" style="font-size: 0.7rem; display: block; margin-bottom: 3px; color: var(--color-gris);">Tarjeta</label>
+                  <select id="simTarjeta" style="width: 100%; padding: 4px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: var(--color-principal); color: var(--color-texto); font-size: 0.75rem;">
+                    <option value="visa">Visa (10% int. anual)</option>
+                    <option value="mastercard">Mastercard (12% int. anual)</option>
+                  </select>
+                </div>
+                <div>
+                  <label for="simCuotas" style="font-size: 0.7rem; display: block; margin-bottom: 3px; color: var(--color-gris);">Cuotas</label>
+                  <select id="simCuotas" style="width: 100%; padding: 4px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: var(--color-principal); color: var(--color-texto); font-size: 0.75rem;">
+                    <option value="1">1 cuota (sin interés)</option>
+                    <option value="3">3 cuotas</option>
+                    <option value="6">6 cuotas</option>
+                    <option value="12">12 cuotas</option>
+                  </select>
+                </div>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.25); padding: 8px; border-radius: 4px; font-size: 0.8rem; border: 1px solid rgba(255,255,255,0.05);">
+                <span id="simCuotaMonto" style="font-weight: bold; color: var(--color-texto);">1x S/ 0.00</span>
+                <span id="simTotalMonto" style="color: var(--color-acento); font-weight: bold;">Total: S/ 0.00</span>
+              </div>
             </div>
           </div>
           ${item.stock !== 'agotado' ? `
@@ -225,6 +277,40 @@ RiveraSound.catalogo = {
         </div>
       `;
       RiveraSound.modal.abrir(modalHtml, item.nombre);
+
+      // Vincular interactividad del simulador
+      const simTarjeta = document.getElementById('simTarjeta');
+      const simCuotas = document.getElementById('simCuotas');
+      const simCuotaMonto = document.getElementById('simCuotaMonto');
+      const simTotalMonto = document.getElementById('simTotalMonto');
+
+      if (simTarjeta && simCuotas && simCuotaMonto && simTotalMonto) {
+        const calcularCuotas = () => {
+          const precio = item.precio;
+          const cuotas = parseInt(simCuotas.value, 10);
+          const tarjeta = simTarjeta.value;
+
+          // Visa: 10% anual, Mastercard: 12% anual
+          const interesAnual = tarjeta === 'visa' ? 0.10 : 0.12;
+          
+          let precioTotal = precio;
+          if (cuotas > 1) {
+            // Interés simple mensual proporcional al número de cuotas (interesAnual / 12)
+            const tasaMensual = interesAnual / 12;
+            const factorInteres = 1 + (tasaMensual * cuotas);
+            precioTotal = precio * factorInteres;
+          }
+
+          const cuotaMonto = precioTotal / cuotas;
+
+          simCuotaMonto.textContent = `${cuotas}x S/ ${cuotaMonto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+          simTotalMonto.textContent = `Total: ${RiveraSound.utils.formatearPrecio(precioTotal)}`;
+        };
+
+        simTarjeta.addEventListener('change', calcularCuotas);
+        simCuotas.addEventListener('change', calcularCuotas);
+        calcularCuotas(); // Cálculo inicial
+      }
       
       // Bindeamos el botón dentro del modal si es que existe
       const modalBtn = document.getElementById('modalAgregarBtn');

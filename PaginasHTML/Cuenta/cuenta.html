@@ -16,6 +16,7 @@
       <button class="cuenta-tab btn-filtro" data-tab="registro">Registrarse</button>
       <button class="cuenta-tab btn-filtro cuenta-tab-sesion" data-tab="perfil" style="display:none;">Mi Perfil</button>
       <button class="cuenta-tab btn-filtro cuenta-tab-sesion" data-tab="pedidos" style="display:none;">Mis Pedidos</button>
+      <button class="cuenta-tab btn-filtro cuenta-tab-sesion" data-tab="admin" style="display:none;">Administración</button>
     </div>
 
     <div id="cuentaPanels">
@@ -123,6 +124,105 @@
           <h3 style="color:var(--color-principal);">No tienes pedidos aún</h3>
           <p style="color:var(--color-gris);">Los pedidos que realices aparecerán aquí.</p>
           <a href="#instrumentos" class="btn btn-primario" style="margin-top:12px;">Explorar catálogo</a>
+        </div>
+      </div>
+
+      <!-- Panel: administración del catálogo -->
+      <div class="cuenta-panel" id="cuentaPanelAdmin">
+        <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+          <div>
+            <h3 style="color: var(--color-acento); margin-bottom: 4px;">Administrar Catálogo</h3>
+            <p style="color: var(--color-gris); font-size: 0.9rem;">Agrega, edita y elimina productos del catálogo en tiempo real.</p>
+          </div>
+          <button id="btnNuevoInstrumento" class="btn btn-primario">+ Nuevo Instrumento</button>
+        </div>
+
+        <!-- Formulario flotante (modal interno) para CRUD -->
+        <div id="modalFormInstrumento" style="display:none; background: rgba(15, 15, 25, 0.95); position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; align-items: center; justify-content: center; padding: 20px;">
+          <div class="form-contenedor" style="max-width: 500px; width: 100%; position: relative; max-height: 90vh; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.1);">
+            <button id="btnCloseModalForm" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: var(--color-gris); font-size: 2rem; cursor: pointer; line-height: 1;">&times;</button>
+            <h3 id="formInstrumentoTitulo" style="color: var(--color-acento); margin-bottom: 16px;">Agregar Instrumento</h3>
+            
+            <form id="formInstrumentoCrud" novalidate style="text-align: left;">
+              <input type="hidden" id="crudId" name="id">
+              
+              <div class="form-grupo">
+                <label for="crudNombre">Nombre del Instrumento</label>
+                <input type="text" id="crudNombre" name="nombre" placeholder="Ej. Saxofón Tenor" required minlength="3" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: var(--color-principal); color: var(--color-texto);">
+                <span class="error-msg"></span>
+              </div>
+              
+              <div class="form-grupo">
+                <label for="crudMarca">Marca / Modelo</label>
+                <input type="text" id="crudMarca" name="marca" placeholder="Ej. Yamaha YTS-26" required minlength="3" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: var(--color-principal); color: var(--color-texto);">
+                <span class="error-msg"></span>
+              </div>
+              
+              <div class="form-grupo">
+                <label for="crudCategoria">Categoría</label>
+                <select id="crudCategoria" name="categoria" required style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: var(--color-principal); color: var(--color-texto);">
+                  <option value="">-- Selecciona una categoría --</option>
+                  <option value="viento">Viento</option>
+                  <option value="cuerda">Cuerda</option>
+                  <option value="teclado">Teclado</option>
+                  <option value="percusion">Percusión</option>
+                </select>
+                <span class="error-msg"></span>
+              </div>
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                <div class="form-grupo">
+                  <label for="crudPrecio">Precio (S/)</label>
+                  <input type="number" id="crudPrecio" name="precio" placeholder="Ej. 1200" required min="1" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: var(--color-principal); color: var(--color-texto);">
+                  <span class="error-msg"></span>
+                </div>
+                
+                <div class="form-grupo">
+                  <label for="crudStock">Disponibilidad</label>
+                  <select id="crudStock" name="stock" required style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: var(--color-principal); color: var(--color-texto);">
+                    <option value="disponible">Disponible</option>
+                    <option value="pedido">Bajo Pedido</option>
+                    <option value="agotado">Agotado</option>
+                  </select>
+                  <span class="error-msg"></span>
+                </div>
+              </div>
+              
+              <div class="form-grupo">
+                <label for="crudEmoji">Emoji Representativo</label>
+                <input type="text" id="crudEmoji" name="emoji" placeholder="Ej. 🎷" required style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: var(--color-principal); color: var(--color-texto);">
+                <span class="error-msg"></span>
+              </div>
+              
+              <div class="form-grupo">
+                <label for="crudDesc">Descripción Corta</label>
+                <textarea id="crudDesc" name="desc" placeholder="Escribe una breve descripción del instrumento..." required minlength="10" rows="3" style="width: 100%; padding: 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.15); background: var(--color-principal); color: var(--color-texto); font-family: inherit; font-size: 0.9rem; resize: vertical;"></textarea>
+                <span class="error-msg"></span>
+              </div>
+              
+              <button type="submit" class="btn btn-primario" style="width: 100%; margin-top: 10px; padding: 10px;">Guardar Instrumento</button>
+            </form>
+          </div>
+        </div>
+
+        <!-- Tabla de instrumentos CRUD -->
+        <div style="overflow-x: auto; background: var(--color-principal); border-radius: var(--radio); box-shadow: 0 4px 10px rgba(0,0,0,0.15); border: 1px solid rgba(255,255,255,0.05); margin-top: 16px;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 0.9rem; min-width: 600px;">
+            <thead>
+              <tr style="border-bottom: 2px solid rgba(255,255,255,0.1); color: var(--color-acento);">
+                <th style="padding: 12px; width: 60px;">Icono</th>
+                <th style="padding: 12px;">Instrumento</th>
+                <th style="padding: 12px;">Marca</th>
+                <th style="padding: 12px;">Categoría</th>
+                <th style="padding: 12px;">Precio</th>
+                <th style="padding: 12px;">Estado</th>
+                <th style="padding: 12px; width: 140px; text-align: center;">Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tablaCrudBody">
+              <!-- Renderizado dinámico -->
+            </tbody>
+          </table>
         </div>
       </div>
     </div>

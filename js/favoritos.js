@@ -14,10 +14,27 @@ RiveraSound.favoritos = {
     this.cargar();
   },
 
+  /* Obtiene la clave de almacenamiento específica para el usuario en sesión */
+  obtenerClave() {
+    const usuario = localStorage.getItem('riverasound_usuario');
+    if (!usuario) return null;
+    try {
+      const parsed = JSON.parse(usuario);
+      return 'riverasound_favoritos_' + parsed.correo.toLowerCase();
+    } catch (_) {
+      return null;
+    }
+  },
+
   /* Lee la lista de favoritos desde localStorage; si no existe, inicia vacía */
   cargar() {
+    const clave = this.obtenerClave();
+    if (!clave) {
+      this.items = [];
+      return;
+    }
     try {
-      const datos = localStorage.getItem(this.key);
+      const datos = localStorage.getItem(clave);
       this.items = datos ? JSON.parse(datos) : [];
     } catch (e) {
       this.items = [];
@@ -26,28 +43,41 @@ RiveraSound.favoritos = {
 
   /* Persiste el arreglo actual de favoritos en localStorage */
   guardar() {
-    localStorage.setItem(this.key, JSON.stringify(this.items));
+    const clave = this.obtenerClave();
+    if (clave) {
+      localStorage.setItem(clave, JSON.stringify(this.items));
+    }
   },
 
   /* Agrega un ítem si no existe, o lo elimina si ya está; retorna true si se agregó */
   toggle(item) {
+    const clave = this.obtenerClave();
+    if (!clave) return null; // No logueado
+
+    this.cargar(); // Carga de forma fresca
     const idx = this.items.findIndex((i) => i.id === item.id);
     if (idx !== -1) {
       this.items.splice(idx, 1);
+      this.guardar();
       return false;
     } else {
       this.items.push({ id: item.id, nombre: item.nombre, marca: item.marca, precio: item.precio, emoji: item.emoji, stock: item.stock });
+      this.guardar();
       return true;
     }
   },
 
   /* Verifica si un ID específico está en favoritos */
   tiene(id) {
+    const clave = this.obtenerClave();
+    if (!clave) return false;
+    this.cargar();
     return this.items.some((i) => i.id === id);
   },
 
   /* Retorna una copia del arreglo de favoritos */
   obtener() {
+    this.cargar();
     return this.items.slice();
   },
 
@@ -55,6 +85,21 @@ RiveraSound.favoritos = {
   renderPagina() {
     const cont = document.getElementById('favoritosGrid');
     if (!cont) return;
+
+    const clave = this.obtenerClave();
+    if (!clave) {
+      cont.innerHTML = `
+        <div class="carrito-vacio">
+          <div style="font-size:4rem;opacity:0.3;margin-bottom:16px;">🔒</div>
+          <h2>Acceso Restringido</h2>
+          <p style="color:var(--color-gris);margin-bottom:20px;">Debes iniciar sesión para poder guardar y ver tus favoritos.</p>
+          <a href="#cuenta-login" class="btn btn-primario">Iniciar Sesión</a>
+        </div>
+      `;
+      return;
+    }
+
+    this.cargar();
 
     /* Si no hay favoritos, muestra un estado vacío amigable */
     if (this.items.length === 0) {

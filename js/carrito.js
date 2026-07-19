@@ -214,26 +214,28 @@ RiveraSound.carrito = {
   /* Pedidos (historial local) */
   
   /**
-   * obtenerPedidos: Recupera la lista de compras del historial de localStorage.
-   * @returns {Array}
-   */
-  obtenerPedidos() {
-    try {
-      const pedidosGuardados = localStorage.getItem(this.pedidosKey);
-      return pedidosGuardados ? JSON.parse(pedidosGuardados) : [];
-    } catch (e) {
-      return [];
-    }
-  },
-
-  /**
    * crearPedido: Crea un pedido formal con ID único a partir del carrito y limpia éste tras el éxito.
+   * @param {object} detallesPago - Detalles del pago (metodo, cuotas, totalFinal, cuotaMonto).
    * @returns {object|boolean} - Retorna el objeto del pedido o falso si no hay sesión activa.
    */
-  crearPedido() {
-    const usuario = localStorage.getItem('riverasound_usuario');
-    if (!usuario) {
+  crearPedido(detallesPago) {
+    const usuarioStr = localStorage.getItem('riverasound_usuario');
+    if (!usuarioStr) {
       RiveraSound.utils.notificar('Inicia sesión para poder realizar la compra', 'info');
+      return false;
+    }
+
+    const usuario = JSON.parse(usuarioStr);
+    
+    // Validación de datos de envío (Dirección, Teléfono y Ciudad obligatorios para comprar)
+    if (!usuario.telefono || !usuario.direccion || !usuario.ciudad) {
+      RiveraSound.utils.notificar('Por favor, registra tu dirección y teléfono de envío en tu perfil para continuar.', 'error');
+      
+      // Redirigir al perfil de usuario tras 1.5 segundos
+      setTimeout(() => {
+        window.location.hash = 'cuenta-perfil';
+      }, 1500);
+      
       return false;
     }
     
@@ -249,15 +251,32 @@ RiveraSound.carrito = {
         cantidad: item.cantidad || 1,
         emoji: item.emoji
       })),
-      total: this.total(),
+      subtotal: this.total(),
+      total: detallesPago.totalFinal,
       estado: 'Pendiente',
-      usuario: JSON.parse(usuario).correo // Vincula el pedido al correo en sesión normalizada
+      metodoPago: detallesPago.metodo,
+      cuotas: detallesPago.cuotas || 1,
+      cuotaMonto: detallesPago.cuotaMonto || 0,
+      usuario: usuario.correo // Vincula el pedido al correo en sesión normalizada
     };
     
     const pedidos = this.obtenerPedidos();
     pedidos.unshift(pedido); // Lo agregamos al inicio de la lista
     localStorage.setItem(this.pedidosKey, JSON.stringify(pedidos));
     return pedido;
+  },
+
+  /**
+   * obtenerPedidos: Recupera la lista de compras del historial de localStorage.
+   * @returns {Array}
+   */
+  obtenerPedidos() {
+    try {
+      const pedidosGuardados = localStorage.getItem(this.pedidosKey);
+      return pedidosGuardados ? JSON.parse(pedidosGuardados) : [];
+    } catch (e) {
+      return [];
+    }
   },
 
   /**
@@ -334,42 +353,29 @@ RiveraSound.carrito = {
     });
 
     // Controlador para botón incrementar cantidad (+)
-    contenedor.querySelectorAll('[data-action="sumar"]').forEach((btn) => {
+    contenedor.querySelectorAll('button[data-action="sumar"]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
-        this.items.forEach((item) => {
-          if (item.id === id) {
-            item.cantidad = (item.cantidad || 1) + 1;
-          }
-        });
-        this.guardar();
-        this.renderPagina();
-        this.renderSidebar();
+        const item = this.items.find((i) => i.id === id);
+        if (item) {
+          item.cantidad = (item.cantidad || 1) + 1;
+          this.guardar();
+          this.renderPagina();
+          RiveraSound.carrito.renderSidebar();
+        }
       });
     });
 
     // Controlador para botón decrementar cantidad (-)
-    contenedor.querySelectorAll('[data-action="restar"]').forEach((btn) => {
+    contenedor.querySelectorAll('button[data-action="restar"]').forEach((btn) => {
       btn.addEventListener('click', () => {
         const id = btn.getAttribute('data-id');
-        let encontrado = false;
-        
-        this.items.forEach((item) => {
-          if (item.id === id) {
-            if (item.cantidad > 1) {
-              item.cantidad--;
-              encontrado = true;
-            } else {
-              this.eliminar(id); // Remueve la fila si llega a 0
-              encontrado = true;
-            }
-          }
-        });
-        
-        if (encontrado) {
+        const item = this.items.find((i) => i.id === id);
+        if (item && (item.cantidad || 1) > 1) {
+          item.cantidad = (item.cantidad || 1) - 1;
           this.guardar();
           this.renderPagina();
-          this.renderSidebar();
+          RiveraSound.carrito.renderSidebar();
         }
       });
     });
@@ -386,19 +392,152 @@ RiveraSound.carrito = {
     const checkoutBtn = document.getElementById('checkoutCarrito');
     if (checkoutBtn) {
       checkoutBtn.addEventListener('click', () => {
-        const pedido = this.crearPedido();
-        if (pedido) {
-          RiveraSound.modal.abrir(`
-            <div style="text-align:center;">
-              <div style="font-size:4rem;margin-bottom:16px;">✅</div>
-              <h3 style="color:var(--color-exito);margin-bottom:12px;">¡Pedido confirmado!</h3>
-              <p style="color:var(--color-gris);margin-bottom:8px;">Código de pedido: <strong>${pedido.id}</strong></p>
-              <p style="color:var(--color-gris);margin-bottom:20px;">Monto total: ${RiveraSound.utils.formatearPrecio(pedido.total)}</p>
-              <p style="color:var(--color-gris);margin-bottom:20px;">Estado actual: <strong>${pedido.estado}</strong></p>
-              <button class="btn btn-primario" onclick="RiveraSound.modal.cerrar()">Cerrar</button>
-            </div>
-          `, 'Compra exitosa');
-          this.vaciar(); // Limpiamos el carrito tras concretar la venta
+        const usuarioStr = localStorage.getItem('riverasound_usuario');
+        if (!usuarioStr) {
+          RiveraSound.utils.notificar('Inicia sesión para poder realizar la compra', 'info');
+          window.location.hash = 'cuenta-login';
+          return;
+        }
+
+        const usuario = JSON.parse(usuarioStr);
+        if (!usuario.telefono || !usuario.direccion || !usuario.ciudad) {
+          RiveraSound.utils.notificar('Por favor, registra tu dirección y teléfono de envío en tu perfil para continuar.', 'error');
+          setTimeout(() => { window.location.hash = 'cuenta-perfil'; }, 1500);
+          return;
+        }
+
+        const subtotal = this.total();
+
+        const paymentHtml = `
+          <div style="text-align:left;">
+            <p style="color:var(--color-gris);margin-bottom:16px;font-size:0.9rem;">Selecciona tu método de pago y cuotas para el pedido:</p>
+            <form id="formCheckoutPago" onsubmit="return false;">
+              <div class="form-grupo" style="margin-bottom:14px;">
+                <label for="checkoutMetodo" style="font-weight:bold;display:block;margin-bottom:6px;font-size:0.85rem;">Método de Pago</label>
+                <select id="checkoutMetodo" style="width:100%;padding:8px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:var(--color-principal);color:var(--color-texto);font-size:0.9rem;">
+                  <option value="efectivo">Efectivo / Transferencia Bancaria (Sin recargo)</option>
+                  <option value="visa">Tarjeta de Crédito Visa (10% int. anual)</option>
+                  <option value="mastercard">Tarjeta de Crédito Mastercard (12% int. anual)</option>
+                </select>
+              </div>
+
+              <!-- Opciones de cuotas (oculto por defecto para efectivo) -->
+              <div id="checkoutCuotasGrupo" class="form-grupo" style="display:none;margin-bottom:14px;">
+                <label for="checkoutCuotas" style="font-weight:bold;display:block;margin-bottom:6px;font-size:0.85rem;">Cantidad de Cuotas</label>
+                <select id="checkoutCuotas" style="width:100%;padding:8px;border-radius:4px;border:1px solid rgba(255,255,255,0.15);background:var(--color-principal);color:var(--color-texto);font-size:0.9rem;">
+                  <option value="1">1 cuota (sin interés)</option>
+                  <option value="3">3 cuotas</option>
+                  <option value="6">6 cuotas</option>
+                  <option value="12">12 cuotas</option>
+                </select>
+              </div>
+
+              <!-- Resumen dinámico de financiamiento -->
+              <div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.08);border-radius:8px;padding:12px;margin-bottom:16px;font-size:0.85rem;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                  <span style="color:var(--color-gris);">Subtotal Carrito:</span>
+                  <span style="font-weight:bold;">${RiveraSound.utils.formatearPrecio(subtotal)}</span>
+                </div>
+                <div id="checkoutInteresFila" style="display:none;justify-content:space-between;margin-bottom:6px;color:var(--color-error);">
+                  <span>Interés Aplicado:</span>
+                  <span id="checkoutInteresValor">S/ 0.00</span>
+                </div>
+                <div id="checkoutCuotaFila" style="display:none;justify-content:space-between;margin-bottom:6px;color:var(--color-texto);">
+                  <span>Valor de Cuota:</span>
+                  <span id="checkoutCuotaValor" style="font-weight:bold;">S/ 0.00</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;border-top:1px solid rgba(255,255,255,0.1);padding-top:6px;font-weight:bold;font-size:1.1rem;color:var(--color-acento);">
+                  <span>Total Final:</span>
+                  <span id="checkoutTotalValor">${RiveraSound.utils.formatearPrecio(subtotal)}</span>
+                </div>
+              </div>
+
+              <button type="submit" class="btn btn-primario" style="width:100%;padding:10px;font-size:0.95rem;">Confirmar Pago y Compra</button>
+            </form>
+          </div>
+        `;
+
+        RiveraSound.modal.abrir(paymentHtml, 'Método de Pago');
+
+        // Lógica interactiva dentro del modal
+        const metodoSelect = document.getElementById('checkoutMetodo');
+        const cuotasGrupo = document.getElementById('checkoutCuotasGrupo');
+        const cuotasSelect = document.getElementById('checkoutCuotas');
+        const interesFila = document.getElementById('checkoutInteresFila');
+        const interesValor = document.getElementById('checkoutInteresValor');
+        const cuotaFila = document.getElementById('checkoutCuotaFila');
+        const cuotaValor = document.getElementById('checkoutCuotaValor');
+        const totalValor = document.getElementById('checkoutTotalValor');
+        const formPago = document.getElementById('formCheckoutPago');
+
+        const recalcularPago = () => {
+          const metodo = metodoSelect.value;
+          let totalFinal = subtotal;
+          let interes = 0;
+          let cuotas = 1;
+          let cuotaMonto = subtotal;
+
+          if (metodo === 'efectivo') {
+            cuotasGrupo.style.display = 'none';
+            interesFila.style.display = 'none';
+            cuotaFila.style.display = 'none';
+          } else {
+            cuotasGrupo.style.display = 'block';
+            cuotas = parseInt(cuotasSelect.value, 10);
+            
+            const interesAnual = metodo === 'visa' ? 0.10 : 0.12;
+            if (cuotas > 1) {
+              const tasaMensual = interesAnual / 12;
+              const factorInteres = 1 + (tasaMensual * cuotas);
+              totalFinal = subtotal * factorInteres;
+              interes = totalFinal - subtotal;
+            }
+
+            cuotaMonto = totalFinal / cuotas;
+
+            interesFila.style.display = 'flex';
+            interesValor.textContent = `+ ${RiveraSound.utils.formatearPrecio(interes)}`;
+            cuotaFila.style.display = 'flex';
+            cuotaValor.textContent = `${cuotas}x ${RiveraSound.utils.formatearPrecio(cuotaMonto)}`;
+          }
+
+          totalValor.textContent = RiveraSound.utils.formatearPrecio(totalFinal);
+
+          return {
+            metodo: metodo === 'efectivo' ? 'Efectivo / Transferencia' : `Tarjeta de Crédito (${metodo === 'visa' ? 'Visa' : 'Mastercard'})`,
+            cuotas,
+            cuotaMonto,
+            totalFinal
+          };
+        };
+
+        if (metodoSelect && cuotasSelect) {
+          metodoSelect.addEventListener('change', recalcularPago);
+          cuotasSelect.addEventListener('change', recalcularPago);
+        }
+
+        if (formPago) {
+          formPago.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const result = recalcularPago();
+            
+            const pedido = this.crearPedido(result);
+            if (pedido) {
+              RiveraSound.modal.abrir(`
+                <div style="text-align:center;">
+                  <div style="font-size:4rem;margin-bottom:16px;">✅</div>
+                  <h3 style="color:var(--color-exito);margin-bottom:12px;">¡Pedido confirmado!</h3>
+                  <p style="color:var(--color-gris);margin-bottom:8px;">Código de pedido: <strong>${pedido.id}</strong></p>
+                  <p style="color:var(--color-gris);margin-bottom:6px;">Método de pago: <strong>${pedido.metodoPago}</strong></p>
+                  ${pedido.cuotas > 1 ? `<p style="color:var(--color-gris);margin-bottom:6px;">Financiado: <strong>${pedido.cuotas} cuotas de S/ ${pedido.cuotaMonto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong></p>` : ''}
+                  <p style="color:var(--color-gris);margin-bottom:20px;">Monto total: ${RiveraSound.utils.formatearPrecio(pedido.total)}</p>
+                  <p style="color:var(--color-gris);margin-bottom:20px;">Estado actual: <strong>${pedido.estado}</strong></p>
+                  <button class="btn btn-primario" onclick="RiveraSound.modal.cerrar()">Cerrar</button>
+                </div>
+              `, 'Compra exitosa');
+              this.vaciar();
+            }
+          });
         }
       });
     }
