@@ -3,8 +3,15 @@
 ## Descripcion General
 
 RiveraSound es un sitio web de comercio electronico para una tienda de instrumentos musicales (Importaciones Rivera S.A.C.).
-Es una Single Page Application (SPA) que funciona completamente del lado del cliente (frontend),
-con persistencia de datos en localStorage del navegador. No requiere servidor backend ni bases de datos.
+Es una Single Page Application (SPA) con un backend opcional en `backend/` (Node.js + Express)
+que guarda los datos en **PostgreSQL** y deja listas las conexiones a **MongoDB, Cassandra y Oracle**.
+
+Funciona en **modo híbrido**:
+- **Con el backend encendido** (`npm start` en `backend/`), catálogo, usuarios, pedidos, favoritos y
+  mensajes se guardan en PostgreSQL.
+- **Sin backend**, todo sigue funcionando como antes con `localStorage`.
+
+Instalación y detalles de las bases de datos: ver [`backend/README.md`](backend/README.md).
 
 ---
 
@@ -29,6 +36,7 @@ RiveraSound/
 │   └── grid-flex.css             # Clases utilitarias Grid y Flexbox
 ├── js/
 │   ├── utils.js                  # Utilidades: notificaciones, debounce, DOM helpers
+│   ├── api.js                    # Cliente de la API: detecta el backend y sincroniza con PostgreSQL
 │   ├── validaciones.js           # Validacion de formularios en tiempo real
 │   ├── carrito.js                # Gestion del carrito + historial de pedidos (localStorage)
 │   ├── modal.js                  # Sistema de modales (abrir/cerrar/Escape)
@@ -37,6 +45,10 @@ RiveraSound/
 │   ├── router.js                 # Enrutador SPA por hash (#) + login/registro local
 │   ├── theme.js                  # Modo claro/oscuro y boton volver arriba
 │   └── app.js                    # Punto de entrada: inicializa todo
+├── backend/                      # API REST + conexiones a PostgreSQL, MongoDB, Cassandra y Oracle
+│   ├── src/db/                   # Una conexión por motor de base de datos
+│   ├── sql/                      # Scripts de cada base de datos
+│   └── README.md                 # Instalación paso a paso
 ├── img/                          # Imagenes de productos
 ├── DOCUMENTACION.md              # Este archivo
 ├── .gitignore
@@ -52,9 +64,14 @@ RiveraSound/
 - **CSS3** - Flexbox, Grid, animaciones keyframes, transiciones, diseno responsivo, modo claro/oscuro
 - **JavaScript (Vanilla)** - SPA Router, manipulacion del DOM, LocalStorage, Fetch API, Intersection Observer
 
+### Backend y bases de datos
+- **Node.js + Express** - API REST en `backend/`
+- **PostgreSQL** - Base principal: tablas, funciones, procedimiento, trigger, vistas y roles
+- **MongoDB / Cassandra / Oracle** - Conexiones y scripts listos para activar desde `backend/.env`
+
 ### Persistencia
-- **localStorage** - Almacenamiento local en el navegador para: carrito de compras, usuarios registrados,
-  historial de pedidos y preferencia de tema (claro/oscuro)
+- **PostgreSQL** (con backend) - Catálogo, usuarios (contraseña con bcrypt), pedidos, favoritos, mensajes
+- **localStorage** - Carrito, sesión y preferencia de tema; sin backend también guarda usuarios y pedidos
 
 ---
 
@@ -140,6 +157,15 @@ HTML parcial correspondiente dentro de `<div id="app">` sin recargar la pagina.
 ---
 
 ## Instalacion y Ejecucion
+
+### Opcion recomendada: con backend y PostgreSQL
+```bash
+cd RiveraSound/backend
+npm install
+copy .env.example .env      # y poner la clave de postgres en PG_ADMIN_PASSWORD
+npm run db:init             # crea la base de datos (solo la primera vez)
+npm start                   # abrir http://localhost:3000
+```
 
 ### Opcion 1: Servidor HTTP (Python)
 ```bash

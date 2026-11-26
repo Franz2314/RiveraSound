@@ -1,0 +1,26 @@
+{
+  "name": "riverasound-backend",
+  "version": "1.0.0",
+  "description": "API REST de RiveraSound: PostgreSQL (principal) + conexiones a MongoDB, Cassandra y Oracle",
+  "main": "src/server.js",
+  "private": true,
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "db:init": "node scripts/inicializar-postgres.js",
+    "db:probar": "node scripts/probar-conexiones.js",
+    "test": "node --test test/"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cassandra-driver": "^4.7.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "mongodb": "^6.12.0",
+    "oracledb": "^6.7.1",
+    "pg": "^8.13.1"
+  }
+}

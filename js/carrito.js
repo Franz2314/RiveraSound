@@ -216,9 +216,9 @@ RiveraSound.carrito = {
   /**
    * crearPedido: Crea un pedido formal con ID único a partir del carrito y limpia éste tras el éxito.
    * @param {object} detallesPago - Detalles del pago (metodo, cuotas, totalFinal, cuotaMonto).
-   * @returns {object|boolean} - Retorna el objeto del pedido o falso si no hay sesión activa.
+   * @returns {Promise<object|boolean>} - El pedido creado, o false si no se pudo crear.
    */
-  crearPedido(detallesPago) {
+  async crearPedido(detallesPago) {
     const usuarioStr = localStorage.getItem('riverasound_usuario');
     if (!usuarioStr) {
       RiveraSound.utils.notificar('Inicia sesión para poder realizar la compra', 'info');
@@ -259,6 +259,27 @@ RiveraSound.carrito = {
       cuotaMonto: detallesPago.cuotaMonto || 0,
       usuario: usuario.correo // Vincula el pedido al correo en sesión normalizada
     };
+
+    // CON BACKEND: el pedido se registra en PostgreSQL con fn_crear_pedido
+    // (una transacción que valida stock y usa los precios de la base de datos).
+    // Si la base lo rechaza (ej. instrumento agotado), no se vacía el carrito.
+    if (RiveraSound.api.disponible) {
+      try {
+        const guardado = await RiveraSound.api.pedir('POST', '/pedidos', {
+          id: pedido.id,
+          correo: pedido.usuario,
+          items: pedido.items.map((i) => ({ id: i.id, cantidad: i.cantidad })),
+          metodoPago: pedido.metodoPago,
+          cuotas: pedido.cuotas,
+          total: pedido.total,
+          cuotaMonto: pedido.cuotaMonto
+        });
+        Object.assign(pedido, guardado); // subtotal y fecha oficiales de la BD
+      } catch (e) {
+        RiveraSound.utils.notificar(e.message, 'error');
+        return false;
+      }
+    }
     
     const pedidos = this.obtenerPedidos();
     pedidos.unshift(pedido); // Lo agregamos al inicio de la lista
@@ -285,6 +306,9 @@ RiveraSound.carrito = {
    * @param {string} nuevoEstado - El nuevo estado (ej: 'Entregado', 'Cancelado').
    */
   actualizarEstadoPedido(pedidoId, nuevoEstado) {
+    // CON BACKEND: CALL sp_cambiar_estado_pedido en PostgreSQL
+    RiveraSound.api.enviarSinEsperar('PATCH', `/pedidos/${encodeURIComponent(pedidoId)}/estado`, { estado: nuevoEstado });
+
     const pedidos = this.obtenerPedidos();
     pedidos.forEach((p) => {
       if (p.id === pedidoId) {
@@ -517,11 +541,18 @@ RiveraSound.carrito = {
         }
 
         if (formPago) {
-          formPago.addEventListener('submit', (e) => {
+          formPago.addEventListener('submit', async (e) => {
             e.preventDefault();
             const result = recalcularPago();
-            
-            const pedido = this.crearPedido(result);
+
+            // Evita doble clic mientras se espera la respuesta de la base de datos
+            const btnConfirmar = formPago.querySelector('button[type="submit"]');
+            if (btnConfirmar) {
+              if (btnConfirmar.disabled) return;
+              btnConfirmar.disabled = true;
+            }
+            const pedido = await this.crearPedido(result);
+            if (btnConfirmar) btnConfirmar.disabled = false;
             if (pedido) {
               RiveraSound.modal.abrir(`
                 <div style="text-align:center;">

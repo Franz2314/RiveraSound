@@ -22,5 +22,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 7. Arranca el enrutador SPA: lee el hash (#) actual en la barra de direcciones
   // e inyecta la vista dinámica correspondiente en el contenedor principal.
   RiveraSound.router.init();
+
+  // 8. Detecta el backend (backend/): si responde, sincroniza catálogo, pedidos
+  // y favoritos con PostgreSQL. Si no, el sitio sigue con localStorage.
+  RiveraSound.api.iniciar();
   
 });

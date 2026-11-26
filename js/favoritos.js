@@ -55,14 +55,18 @@ RiveraSound.favoritos = {
     if (!clave) return null; // No logueado
 
     this.cargar(); // Carga de forma fresca
+    const correo = JSON.parse(localStorage.getItem('riverasound_usuario')).correo;
     const idx = this.items.findIndex((i) => i.id === item.id);
     if (idx !== -1) {
       this.items.splice(idx, 1);
       this.guardar();
+      // CON BACKEND: también se quita de la tabla "favoritos" (sin bloquear la interfaz)
+      RiveraSound.api.enviarSinEsperar('DELETE', `/favoritos/${encodeURIComponent(item.id)}?correo=${encodeURIComponent(correo)}`);
       return false;
     } else {
       this.items.push({ id: item.id, nombre: item.nombre, marca: item.marca, precio: item.precio, emoji: item.emoji, stock: item.stock });
       this.guardar();
+      RiveraSound.api.enviarSinEsperar('POST', '/favoritos', { correo, instrumentoId: item.id });
       return true;
     }
   },

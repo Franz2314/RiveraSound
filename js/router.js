@@ -69,6 +69,8 @@ RiveraSound.router = {
         e.preventDefault();
         const emailInput = document.getElementById('newsletterCorreo');
         if (RiveraSound.validaciones.validarCampo(emailInput)) {
+          // CON BACKEND: guarda el correo en la tabla "suscriptores"
+          RiveraSound.api.enviarSinEsperar('POST', '/suscriptores', { correo: emailInput.value.trim() });
           RiveraSound.utils.notificar('¡Te has suscrito con éxito al boletín!', 'exito');
           formNews.reset();
           const grupo = emailInput.closest('.form-grupo');
@@ -255,6 +257,17 @@ RiveraSound.router = {
             return;
           }
           
+          // CON BACKEND: guarda el mensaje en la tabla "mensajes" (tipo contacto)
+          const valor = (id) => (document.getElementById(id) || {}).value || '';
+          RiveraSound.api.enviarSinEsperar('POST', '/mensajes', {
+            tipo: 'contacto',
+            nombre: `${valor('nombre')} ${valor('apellido')}`.trim(),
+            correo: valor('correo'),
+            telefono: valor('telefono'),
+            asunto: valor('consulta'),
+            mensaje: valor('mensaje')
+          });
+
           document.getElementById('mensajeExito').style.display = 'block';
           formContacto.reset();
           RiveraSound.utils.notificar('Mensaje enviado con éxito', 'exito');
@@ -277,6 +290,17 @@ RiveraSound.router = {
             return;
           }
           
+          // CON BACKEND: guarda la solicitud (tipo importacion)
+          const valorImp = (id) => (document.getElementById(id) || {}).value || '';
+          RiveraSound.api.enviarSinEsperar('POST', '/mensajes', {
+            tipo: 'importacion',
+            nombre: valorImp('importNombre'),
+            correo: valorImp('importCorreo'),
+            asunto: valorImp('importInstrumento'),
+            presupuesto: parseFloat(valorImp('importPresupuesto')) || null,
+            mensaje: valorImp('importDetalles')
+          });
+
           document.getElementById('importExito').style.display = 'block';
           formImport.reset();
           formImport.querySelectorAll('.form-grupo').forEach((g) => g.classList.remove('success', 'error'));
@@ -319,6 +343,13 @@ RiveraSound.router = {
                 ev.preventDefault();
                 const fbMsg = document.getElementById('feedbackMensaje');
                 if (fbMsg && fbMsg.value.trim().length >= 3) {
+                  // CON BACKEND: guarda el comentario (tipo feedback)
+                  const fbNombre = document.getElementById('feedbackNombre');
+                  RiveraSound.api.enviarSinEsperar('POST', '/mensajes', {
+                    tipo: 'feedback',
+                    nombre: (fbNombre && fbNombre.value.trim()) || 'Anónimo',
+                    mensaje: fbMsg.value.trim()
+                  });
                   RiveraSound.utils.notificar('¡Gracias por tu feedback!', 'exito');
                   RiveraSound.modal.cerrar();
                 } else {
@@ -398,7 +429,7 @@ RiveraSound.router = {
       if (haySesion) {
         try {
           const usuarioActivo = JSON.parse(localStorage.getItem('riverasound_usuario'));
-          esAdmin = usuarioActivo && usuarioActivo.correo === 'demo@riverasound.pe';
+          esAdmin = RiveraSound.api.esAdmin(usuarioActivo); // rol 'admin' en PostgreSQL o cuenta demo
         } catch (_) {}
       }
 
@@ -438,7 +469,7 @@ RiveraSound.router = {
       /* --- INICIO DE SESIÓN LOCAL --- */
       const formLogin = document.getElementById('formLogin');
       if (formLogin) {
-        formLogin.addEventListener('submit', (e) => {
+        formLogin.addEventListener('submit', async (e) => {
           e.preventDefault();
           const correoInput = document.getElementById('loginCorreo');
           const passwordInput = document.getElementById('loginPassword');
@@ -467,9 +498,22 @@ RiveraSound.router = {
           try { usuarios = JSON.parse(localStorage.getItem('riverasound_usuarios')) || []; } catch (_) {}
 
           let usuarioValido = null;
-          
-          // Verificamos si corresponde a la cuenta Demo académica o a un usuario registrado
-          if (correo === 'demo@riverasound.pe' && password === 'demo123') {
+
+          if (RiveraSound.api.disponible) {
+            // CON BACKEND: PostgreSQL valida la contraseña (fn_validar_login)
+            try {
+              usuarioValido = await RiveraSound.api.pedir('POST', '/usuarios/login', { correo, password });
+              await RiveraSound.api.sincronizarUsuario(usuarioValido.correo); // trae pedidos y favoritos
+            } catch (err) {
+              if (err.status !== 401) { // 401 = credenciales incorrectas (mensaje de abajo)
+                btn.textContent = 'Iniciar sesión';
+                btn.disabled = false;
+                RiveraSound.utils.notificar(err.message, 'error');
+                return;
+              }
+            }
+          } else if (correo === 'demo@riverasound.pe' && password === 'demo123') {
+          // SIN BACKEND: cuenta demo académica o usuario registrado en localStorage
             usuarioValido = {
               nombre: 'Usuario',
               apellido: 'Demo',
@@ -531,7 +575,7 @@ RiveraSound.router = {
       /* --- REGISTRO DE USUARIOS LOCAL --- */
       const formRegistro = document.getElementById('formRegistro');
       if (formRegistro) {
-        formRegistro.addEventListener('submit', (e) => {
+        formRegistro.addEventListener('submit', async (e) => {
           e.preventDefault();
           const btn = formRegistro.querySelector('button[type="submit"]');
           btn.textContent = 'Registrando...';
@@ -562,6 +606,21 @@ RiveraSound.router = {
           const correo = correoInput.value.trim().toLowerCase();
           const password = passwordInput.value;
 
+          // CON BACKEND: el usuario se crea en PostgreSQL (contraseña con bcrypt)
+          if (RiveraSound.api.disponible) {
+            try {
+              await RiveraSound.api.pedir('POST', '/usuarios/registro', { nombre, apellido, correo, password });
+              RiveraSound.utils.notificar('Registro exitoso. ¡Inicia sesión!', 'exito');
+              window.location.hash = 'cuenta-login';
+            } catch (err) {
+              RiveraSound.utils.notificar(err.message, 'error'); // ej. "El correo ya está registrado"
+            }
+            btn.textContent = 'Crear cuenta';
+            btn.disabled = false;
+            return;
+          }
+
+          // SIN BACKEND: se guarda en localStorage como antes
           let usuarios = [];
           try { usuarios = JSON.parse(localStorage.getItem('riverasound_usuarios')) || []; } catch (_) {}
 
@@ -613,7 +672,7 @@ RiveraSound.router = {
       const formPerfil = document.getElementById('formPerfilDatos');
       if (formPerfil && !formPerfil.hasAttribute('data-handler')) {
         formPerfil.setAttribute('data-handler', '1');
-        formPerfil.addEventListener('submit', (e) => {
+        formPerfil.addEventListener('submit', async (e) => {
           e.preventDefault();
           let esValido = true;
           formPerfil.querySelectorAll('input').forEach((input) => {
@@ -630,6 +689,18 @@ RiveraSound.router = {
             usuario.telefono = document.getElementById('perfilTelefono').value.trim();
             usuario.direccion = document.getElementById('perfilDireccion').value.trim();
             usuario.ciudad = document.getElementById('perfilCiudad').value.trim();
+
+            // CON BACKEND: se guarda primero en PostgreSQL (lo exige fn_crear_pedido)
+            if (RiveraSound.api.disponible) {
+              try {
+                await RiveraSound.api.pedir('PUT', `/usuarios/${encodeURIComponent(usuario.correo)}/envio`, {
+                  telefono: usuario.telefono, direccion: usuario.direccion, ciudad: usuario.ciudad
+                });
+              } catch (err) {
+                RiveraSound.utils.notificar(err.message, 'error');
+                return;
+              }
+            }
             localStorage.setItem('riverasound_usuario', JSON.stringify(usuario));
 
             let usuarios = [];
@@ -711,7 +782,7 @@ RiveraSound.router = {
     
     const parsedUser = JSON.parse(usuario);
     const correo = parsedUser.correo;
-    const esAdmin = correo === 'demo@riverasound.pe';
+    const esAdmin = RiveraSound.api.esAdmin(parsedUser);
     
     // Filtramos solo los pedidos del usuario logueado en sesión activa
     const pedidosUsuario = pedidos.filter((p) => p.usuario.trim().toLowerCase() === correo.trim().toLowerCase());
