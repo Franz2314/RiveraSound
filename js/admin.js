@@ -300,7 +300,7 @@ RiveraSound.admin = {
   /**
    * guardarRegistro: Guarda el instrumento nuevo o editado en el array persistido.
    */
-  guardarRegistro() {
+  async guardarRegistro() {
     if (!this.validarFormulario()) {
       RiveraSound.utils.notificar('Por favor, completa los campos obligatorios correctamente.', 'error');
       return;
@@ -320,6 +320,20 @@ RiveraSound.admin = {
       emoji: el.inputEmoji.value.trim(),
       desc: el.inputDesc.value.trim()
     };
+
+    // Con backend: primero se guarda en PostgreSQL. Si la base de datos lo
+    // rechaza (precio inválido, id duplicado...), se avisa y no se cambia nada.
+    if (RiveraSound.api.disponible) {
+      try {
+        const guardado = idEdicion
+          ? await RiveraSound.api.pedir('PUT', `/instrumentos/${encodeURIComponent(idEdicion)}`, itemMod)
+          : await RiveraSound.api.pedir('POST', '/instrumentos', itemMod);
+        itemMod.id = guardado.id; // por si el backend generó el id
+      } catch (e) {
+        RiveraSound.utils.notificar(e.message, 'error');
+        return;
+      }
+    }
 
     if (idEdicion) {
       // Modo Edición: actualizamos el objeto existente en el array
@@ -345,13 +359,25 @@ RiveraSound.admin = {
   /**
    * confirmarEliminar: Pide confirmación al usuario antes de eliminar un registro.
    */
-  confirmarEliminar(id) {
+  async confirmarEliminar(id) {
     const productos = RiveraSound.catalogo.instrumentos;
     const item = productos.find((p) => p.id === id);
     if (!item) return;
 
     const seguro = confirm(`¿Estás seguro de eliminar el instrumento "${item.nombre} - ${item.marca}"?`);
     if (seguro) {
+      // Con backend: borrado lógico en PostgreSQL (los pedidos antiguos lo conservan)
+      if (RiveraSound.api.disponible) {
+        try {
+          await RiveraSound.api.pedir('DELETE', `/instrumentos/${encodeURIComponent(id)}`);
+        } catch (e) {
+          // 404 = solo existía en este navegador: se borra igual de la copia local
+          if (e.status !== 404) {
+            RiveraSound.utils.notificar(e.message, 'error');
+            return;
+          }
+        }
+      }
       const filtrados = productos.filter((p) => p.id !== id);
       RiveraSound.catalogo.instrumentos = filtrados; // Guarda en localStorage
       this.renderTabla();
